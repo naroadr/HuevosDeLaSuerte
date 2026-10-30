@@ -166,12 +166,13 @@ function connectStreamerBot() {
     ws.onopen = () => {
         console.log("Conectado correctamente a Streamer.bot por WebSocket 🚀");
 
-        // Enviar suscripción estandarizada a eventos de Streamer.bot
+        // Suscribirnos tanto a recompensas como a mensajes de chat para atrapar al bot
         const subscribeMessage = {
             "request": "Subscribe",
             "events": {
                 "Twitch": [
-                    "RewardRedemption"
+                    "RewardRedemption",
+                    "ChatMessage"
                 ]
             }
         };
