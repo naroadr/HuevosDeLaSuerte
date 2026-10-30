@@ -97,7 +97,6 @@ document.addEventListener("DOMContentLoaded", () => {
             currentCount--;
             localStorage.setItem(storageKey, currentCount);
             
-            // Actualizar interfaz tras gastar huevo
             const counterElement = document.getElementById(`cnt-${selectedEgg}`);
             if (counterElement) counterElement.textContent = currentCount;
 
@@ -159,14 +158,14 @@ document.addEventListener("DOMContentLoaded", () => {
     connectStreamerBot();
 });
 
-// Función de conexión al WebSocket de Streamer.bot
+// Función de conexión al WebSocket de Streamer.bot con formato corregido
 function connectStreamerBot() {
     const ws = new WebSocket('ws://localhost:8080/');
 
     ws.onopen = () => {
         console.log("Conectado correctamente a Streamer.bot por WebSocket 🚀");
 
-        // Suscribirnos tanto a recompensas como a mensajes de chat para atrapar al bot
+        // Formato exacto de suscripción para Streamer.bot
         const subscribeMessage = {
             "request": "Subscribe",
             "events": {
@@ -189,24 +188,25 @@ function connectStreamerBot() {
             let textoAAnalizar = "";
             let username = "Usuario";
 
-            // Extraer título de recompensa y usuario
             if (message.data) {
                 if (message.data.reward && message.data.reward.title) {
                     textoAAnalizar = message.data.reward.title.toLowerCase();
+                } else if (message.data.message && message.data.message.message) {
+                    textoAAnalizar = message.data.message.message.toLowerCase();
                 }
+
                 if (message.data.user && message.data.user.name) {
                     username = message.data.user.name;
-                } else if (message.data.displayName) {
-                    username = message.data.displayName;
+                } else if (message.data.message && message.data.message.user && message.data.message.user.name) {
+                    username = message.data.message.user.name;
                 }
             }
             
-            // Si el mensaje no trae estructura directa, analiza la cadena completa
+            // Analizar toda la cadena si no se extrajo de forma directa
             if (!textoAAnalizar) {
                 textoAAnalizar = JSON.stringify(message).toLowerCase();
             }
 
-            // Identificar tipo de huevo
             let eggType = null;
             if (textoAAnalizar.includes("roto")) eggType = "roto";
             else if (textoAAnalizar.includes("poco comun") || textoAAnalizar.includes("poco común") || textoAAnalizar.includes("pcomun")) eggType = "pcomun";
@@ -215,7 +215,6 @@ function connectStreamerBot() {
             else if (textoAAnalizar.includes("epico") || textoAAnalizar.includes("épico")) eggType = "epico";
             else if (textoAAnalizar.includes("legendario")) eggType = "legendario";
 
-            // Actualizar contador y LocalStorage
             if (eggType) {
                 const storageKey = `cnt-${eggType}`;
                 let currentCount = parseInt(localStorage.getItem(storageKey)) || 0;
