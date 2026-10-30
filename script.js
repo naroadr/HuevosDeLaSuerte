@@ -1,9 +1,12 @@
 const tiposHuevos = ['roto', 'comun', 'pcomun', 'raro', 'epico', 'legendario'];
+
+// Cargar contadores guardados al abrir la página
 tiposHuevos.forEach(tipo => {
     const count = localStorage.getItem(`cnt-${tipo}`) || 0;
     const el = document.getElementById(`cnt-${tipo}`);
     if (el) el.textContent = count;
 });
+
 document.addEventListener("DOMContentLoaded", () => {
     // 1. Modo claro / oscuro
     const themeToggleBtn = document.getElementById("theme-toggle");
@@ -93,6 +96,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
             currentCount--;
             localStorage.setItem(storageKey, currentCount);
+            
+            // Actualizar interfaz tras gastar huevo
+            const counterElement = document.getElementById(`cnt-${selectedEgg}`);
+            if (counterElement) counterElement.textContent = currentCount;
 
             hatchBtn.disabled = true;
             if (eggSelect) eggSelect.disabled = true;
@@ -147,7 +154,12 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 3500);
         });
     }
+
+    // Inicializar conexión con Streamer.bot
+    connectStreamerBot();
 });
+
+// Función de conexión al WebSocket de Streamer.bot
 function connectStreamerBot() {
     const ws = new WebSocket('ws://localhost:8080/');
 
@@ -156,20 +168,28 @@ function connectStreamerBot() {
     };
 
     ws.onmessage = (event) => {
-        const message = JSON.parse(event.data);
-        
-        if (message.event && message.event.type === 'Twitch.RewardRedemption') {
-            const rewardName = message.data.reward.title.toLowerCase();
-            const username = message.data.user.name;
+        try {
+            const message = JSON.parse(event.data);
+            console.log("Mensaje recibido desde Streamer.bot:", message);
+
+            let textoAAnalizar = "";
+            let username = "Usuario";
+
+            if (message.data && message.data.reward && message.data.reward.title) {
+                textoAAnalizar = message.data.reward.title.toLowerCase();
+                if (message.data.user && message.data.user.name) username = message.data.user.name;
+            } else if (message.data && message.data.message && message.data.message.message) {
+                textoAAnalizar = message.data.message.message.toLowerCase();
+                if (message.data.message.user && message.data.message.user.name) username = message.data.message.user.name;
+            }
 
             let eggType = null;
-
-            if (rewardName.includes("roto")) eggType = "roto";
-            else if (rewardName.includes("comun")) eggType = "comun";
-            else if (rewardName.includes("poco comun")) eggType = "pcomun";
-            else if (rewardName.includes("raro")) eggType = "raro";
-            else if (rewardName.includes("epico")) eggType = "epico";
-            else if (rewardName.includes("legendario")) eggType = "legendario";
+            if (textoAAnalizar.includes("roto")) eggType = "roto";
+            else if (textoAAnalizar.includes("poco comun") || textoAAnalizar.includes("poco común") || textoAAnalizar.includes("pcomun")) eggType = "pcomun";
+            else if (textoAAnalizar.includes("comun") || textoAAnalizar.includes("común")) eggType = "comun";
+            else if (textoAAnalizar.includes("raro")) eggType = "raro";
+            else if (textoAAnalizar.includes("epico") || textoAAnalizar.includes("épico")) eggType = "epico";
+            else if (textoAAnalizar.includes("legendario")) eggType = "legendario";
 
             if (eggType) {
                 const storageKey = `cnt-${eggType}`;
@@ -182,8 +202,10 @@ function connectStreamerBot() {
                     counterElement.textContent = currentCount;
                 }
 
-                console.log(`¡${username} canjeó un huevo tipo ${eggType}! Total: ${currentCount}`);
+                console.log(`¡${username} consiguió un huevo tipo [${eggType}]! Total actual: ${currentCount}`);
             }
+        } catch (e) {
+            console.error("Error al procesar el mensaje de Streamer.bot:", e);
         }
     };
 
@@ -192,10 +214,7 @@ function connectStreamerBot() {
         setTimeout(connectStreamerBot, 5000);
     };
 
-    ws.onerror = (error) => { console.error("Error en el WebSocket:", error); 
-
-    }        
+    ws.onerror = (error) => { 
+        console.error("Error en el WebSocket:", error); 
     };
-document.addEventListener("DOMContentLoaded", () => {
-    connectStreamerBot();
-});
+}
