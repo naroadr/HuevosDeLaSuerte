@@ -1,135 +1,144 @@
-const wsUri = "ws://127.0.0.1:8080/";
-let websocket;
+document.addEventListener("DOMContentLoaded", () => {
+    // 1. Modo claro / oscuro
+    const themeToggleBtn = document.getElementById("theme-toggle");
+    const themeIcon = document.getElementById("theme-icon");
+    const currentTheme = localStorage.getItem("theme") || "dark";
 
-function initWebSocket() {
-    console.log("Conectando a Streamer.bot WebSocket...");
-    websocket = new WebSocket(wsUri);
-
-    websocket.onopen = function(evt) {
-        console.log("¡Conectado exitosamente al WebSocket!");
-    };
-
-    websocket.onclose = function(evt) {
-        console.log("Desconectado del WebSocket. Reintentando en 5 segundos...");
-        setTimeout(initWebSocket, 5000);
-    };
-
-    websocket.onmessage = function(evt) {
-        try {
-            const data = JSON.parse(evt.data);
-            
-            if (data.event && data.event.type === "Custom") {
-                if (data.data.action === "updateInventory") {
-                    actualizarInventario(data.data);
-                }
-            }
-        } catch (error) {
-            console.error("Error al procesar el mensaje del WebSocket:", error);
-        }
-    };
-
-    websocket.onerror = function(evt) {
-        console.error("Error en WebSocket:", evt);
-    };
-}
-
-// ACTUALIZAR LOS CONTADORES EN EL HTML
-function actualizarInventario(datos) {
-    if (datos.usuario) {
-        document.getElementById("user-title").innerText = `Inventario de @${datos.usuario}`;
-    }
-
-    if (datos.roto !== undefined) document.getElementById("cnt-roto").innerText = datos.roto;
-    if (datos.comun !== undefined) document.getElementById("cnt-comun").innerText = datos.comun;
-    if (datos.pcomun !== undefined) document.getElementById("cnt-pcomun").innerText = datos.pcomun;
-    if (datos.raro !== undefined) document.getElementById("cnt-raro").innerText = datos.raro;
-    if (datos.epico !== undefined) document.getElementById("cnt-epico").innerText = datos.epico;
-    if (datos.legendario !== undefined) document.getElementById("cnt-legendario").innerText = datos.legendario;
-}
-// VENTANA DE FUNCIONAMIENTO DE HUEVOS
-const modal = document.getElementById("guide-modal");
-const openBtn = document.getElementById("open-guide-btn");
-const closeBtn = document.getElementById("close-guide-btn");
-
-if (openBtn && modal && closeBtn) {
-    openBtn.onclick = function() {
-        modal.style.display = "block";
-    }
-
-    closeBtn.onclick = function() {
-        modal.style.display = "none";
-    }
-
-    window.onclick = function(event) {
-        if (event.target === modal) {
-            modal.style.display = "none";
-        }
-    }
-}
-// Animacion huevos
-function iniciarHuevosFlotantes() {
-    let container = document.querySelector(".bg-eggs-container");
-    if (!container) {
-        container = document.createElement("div");
-        container.className = "bg-eggs-container";
-        document.body.prepend(container);
-    }
-
-    const listaImagenes = [
-        "imagenes/huevodragonu.png"
-    ];
-
-    const totalHuevosFondo = 15;
-
-    for (let i = 0; i < totalHuevosFondo; i++) {
-        const egg = document.createElement("img");
-        
-        const imgAleatoria = listaImagenes[Math.floor(Math.random() * listaImagenes.length)];
-        egg.src = imgAleatoria;
-        egg.className = "bg-floating-egg";
-
-        const tamaño = Math.random() * 50 + 35;
-        egg.style.width = `${tamaño}px`;
-
-        egg.style.left = `${Math.random() * 100}%`;
-
-        const duracion = Math.random() * 10 + 12;
-        egg.style.animationDuration = `${duracion}s`;
-
-        const retraso = Math.random() * 12;
-        egg.style.animationDelay = `${retraso}s`;
-
-        container.appendChild(egg);
-    }
-}
-// Modo Oscuro/Modo Claro
-const themeToggleBtn = document.getElementById("theme-toggle");
-const themeIcon = document.getElementById("theme-icon");
-
-
-const savedTheme = localStorage.getItem("theme") || "dark";
-document.documentElement.setAttribute("data-theme", savedTheme);
-updateThemeIcon(savedTheme);
-
-themeToggleBtn.addEventListener("click", () => {
-    const currentTheme = document.documentElement.getAttribute("data-theme");
-    const newTheme = currentTheme === "dark" ? "light" : "dark";
-
-    document.documentElement.setAttribute("data-theme", newTheme);
-    localStorage.setItem("theme", newTheme);
-    updateThemeIcon(newTheme);
-});
-
-function updateThemeIcon(theme) {
-    if (theme === "light") {
-        themeIcon.src = "imagenes/sol.png";
-        themeIcon.alt = "Modo Oscuro";
+    if (currentTheme === "light") {
+        document.documentElement.setAttribute("data-theme", "light");
+        if (themeIcon) themeIcon.src = "imagenes/sol.png";
     } else {
-        themeIcon.src = "imagenes/luna.png";
-        themeIcon.alt = "Modo Claro";
+        document.documentElement.removeAttribute("data-theme");
+        if (themeIcon) themeIcon.src = "imagenes/luna.png";
     }
-}
 
-window.addEventListener("load", () => {
-    iniciarHuevosFlotantes();
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener("click", () => {
+            let theme = document.documentElement.getAttribute("data-theme");
+            if (theme === "light") {
+                document.documentElement.removeAttribute("data-theme");
+                localStorage.setItem("theme", "dark");
+                if (themeIcon) themeIcon.src = "imagenes/luna.png";
+            } else {
+                document.documentElement.setAttribute("data-theme", "light");
+                localStorage.setItem("theme", "light");
+                if (themeIcon) themeIcon.src = "imagenes/sol.png";
+            }
+        });
+    }
+
+    // 2. Fondo animado de huevos 
+    const bgContainer = document.getElementById("bg-eggs");
+    const eggImages = [
+        'imagenes/huevo-roto.png',
+        'imagenes/huevo-comun.png',
+        'imagenes/huevo-poco-comun.png',
+        'imagenes/huevo-raro.png',
+        'imagenes/huevo-epico.png',
+        'imagenes/huevo-legendario.png'
+    ];
+    
+    function createFloatingEgg() {
+        if (!bgContainer) return;
+        const img = document.createElement("img");
+        img.src = eggImages[Math.floor(Math.random() * eggImages.length)];
+        img.classList.add("bg-floating-egg");
+        
+        const size = Math.floor(Math.random() * 30) + 30; // 30px - 60px
+        img.style.width = `${size}px`;
+        img.style.height = `${size}px`;
+        img.style.left = `${Math.random() * 100}vw`;
+        
+        const duration = Math.random() * 6 + 6; // 6s - 12s
+        img.style.animationDuration = `${duration}s`;
+        
+        bgContainer.appendChild(img);
+        setTimeout(() => img.remove(), duration * 1000);
+    }
+    setInterval(createFloatingEgg, 800);
+
+    // 3. Eclosión de huevo, Historial y Confeti
+    const hatchBtn = document.getElementById("hatch-btn");
+    const eggDisplay = document.getElementById("egg-display");
+    const eggSelect = document.getElementById("egg-type-select");
+    const resultDiv = document.getElementById("hatch-result");
+
+    const rewardsMap = {
+        roto: ["💩", "🪨", "🦴", "💨"],
+        comun: ["🌟", "🍪", "🪙", "💧"],
+        pcomun: ["🔮", "⚡", "🎁", "🍀"],
+        raro: ["💎", "🔥", "🚀", "🛡️"],
+        epico: ["👑", "🦄", "⭐", "💎"],
+        legendario: ["🏆", "🐉", "💎", "👑"]
+    };
+
+    if (hatchBtn) {
+        hatchBtn.addEventListener("click", () => {
+            const selectedEgg = eggSelect ? eggSelect.value : "comun";
+            
+            const storageKey = `cnt-${selectedEgg}`;
+            let currentCount = parseInt(localStorage.getItem(storageKey)) || 0;
+
+            if (currentCount <= 0) {
+                resultDiv.textContent = "¡No te quedan huevos de este tipo para eclosionar!";
+                resultDiv.style.color = "#ef4444";
+                return;
+            }
+
+            currentCount--;
+            localStorage.setItem(storageKey, currentCount);
+
+            hatchBtn.disabled = true;
+            if (eggSelect) eggSelect.disabled = true;
+
+            resultDiv.textContent = "¿El huevo va a abrirse... ?";
+            resultDiv.style.color = "var(--count-color)";
+            eggDisplay.textContent = "🥚";
+
+            eggDisplay.classList.add("shaking");
+            
+            setTimeout(() => {
+                resultDiv.textContent = "¡El huevo está temblando!";
+            }, 1500);
+
+            setTimeout(() => {
+                eggDisplay.classList.remove("shaking");
+                eggDisplay.classList.add("hatching-pop");
+
+                const possibleRewards = rewardsMap[selectedEgg] || rewardsMap["comun"];
+                const finalPrize = possibleRewards[Math.floor(Math.random() * possibleRewards.length)];
+
+                setTimeout(() => {
+                    eggDisplay.textContent = finalPrize;
+                    eggDisplay.classList.remove("hatching-pop");
+                    resultDiv.innerHTML = `¡Felicidades! Ha nacido / conseguido: <strong>${finalPrize}</strong>`;
+                    resultDiv.style.color = "#16a34a";
+                    
+                    if (['epico', 'legendario'].includes(selectedEgg) && typeof confetti === 'function') {
+                        confetti({
+                            particleCount: 100,
+                            spread: 80,
+                            origin: { y: 0.6 },
+                            colors: ['#a855f7', '#ca8a04', '#0284c7', '#22c55e']
+                        });
+                    }
+
+                    const historyItem = {
+                        egg: selectedEgg.toUpperCase(),
+                        prize: finalPrize,
+                        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    };
+
+                    let history = JSON.parse(localStorage.getItem("egg-history")) || [];
+                    history.unshift(historyItem); 
+                    if (history.length > 5) history.pop(); 
+                    localStorage.setItem("egg-history", JSON.stringify(history));
+
+                    hatchBtn.disabled = false;
+                    if (eggSelect) eggSelect.disabled = false;
+                }, 300);
+
+            }, 3500);
+        });
+    }
 });

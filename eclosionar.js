@@ -117,3 +117,23 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
+// 4. Historial de eclosiones
+setTimeout(() => {
+    eggDisplay.textContent = finalPrize;
+    eggDisplay.classList.remove("hatching-pop");
+    resultDiv.innerHTML = `¡Felicidades! Has conseguido: <strong>${finalPrize}</strong>`;
+    resultDiv.style.color = "#16a34a";
+                    
+    const historyItem = {
+        egg: selectedEgg.toUpperCase(),
+        prize: finalPrize,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+
+    let history = JSON.parse(localStorage.getItem("egg-history")) || [];
+    history.unshift(historyItem); 
+    if (history.length > 5) history.pop(); 
+    localStorage.setItem("egg-history", JSON.stringify(history));
+    hatchBtn.disabled = false;
+    if (eggSelect) eggSelect.disabled = false;
+}, 300);
