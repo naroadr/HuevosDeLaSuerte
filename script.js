@@ -192,11 +192,10 @@ function connectStreamerBot() {
         setTimeout(connectStreamerBot, 5000);
     };
 
-    ws.error = (error) => {
-        console.error("Error en el WebSocket:", error);
-    };
-}
+    ws.onerror = (error) => { console.error("Error en el WebSocket:", error); 
 
+    }        
+    };
 document.addEventListener("DOMContentLoaded", () => {
     connectStreamerBot();
 });
