@@ -1,3 +1,9 @@
+const tiposHuevos = ['roto', 'comun', 'pcomun', 'raro', 'epico', 'legendario'];
+tiposHuevos.forEach(tipo => {
+    const count = localStorage.getItem(`cnt-${tipo}`) || 0;
+    const el = document.getElementById(`cnt-${tipo}`);
+    if (el) el.textContent = count;
+});
 document.addEventListener("DOMContentLoaded", () => {
     // 1. Modo claro / oscuro
     const themeToggleBtn = document.getElementById("theme-toggle");
