@@ -111,7 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 setTimeout(() => {
                     eggDisplay.textContent = finalPrize;
                     eggDisplay.classList.remove("hatching-pop");
-                    resultDiv.innerHTML = `¡Felicidades! Ha nacido / conseguido: <strong>${finalPrize}</strong>`;
+                    resultDiv.innerHTML = `¡Felicidades! Has conseguido: <strong>${finalPrize}</strong>`;
                     resultDiv.style.color = "#16a34a";
                     
                     if (['epico', 'legendario'].includes(selectedEgg) && typeof confetti === 'function') {
@@ -141,4 +141,56 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 3500);
         });
     }
+});
+function connectStreamerBot() {
+    const ws = new WebSocket('ws://localhost:8080/');
+
+    ws.onopen = () => {
+        console.log("Conectado correctamente a Streamer.bot por WebSocket 🚀");
+    };
+
+    ws.onmessage = (event) => {
+        const message = JSON.parse(event.data);
+        
+        if (message.event && message.event.type === 'Twitch.RewardRedemption') {
+            const rewardName = message.data.reward.title.toLowerCase();
+            const username = message.data.user.name;
+
+            let eggType = null;
+
+            if (rewardName.includes("roto")) eggType = "roto";
+            else if (rewardName.includes("comun")) eggType = "comun";
+            else if (rewardName.includes("poco comun")) eggType = "pcomun";
+            else if (rewardName.includes("raro")) eggType = "raro";
+            else if (rewardName.includes("epico")) eggType = "epico";
+            else if (rewardName.includes("legendario")) eggType = "legendario";
+
+            if (eggType) {
+                const storageKey = `cnt-${eggType}`;
+                let currentCount = parseInt(localStorage.getItem(storageKey)) || 0;
+                currentCount++;
+                localStorage.setItem(storageKey, currentCount);
+
+                const counterElement = document.getElementById(`cnt-${eggType}`);
+                if (counterElement) {
+                    counterElement.textContent = currentCount;
+                }
+
+                console.log(`¡${username} canjeó un huevo tipo ${eggType}! Total: ${currentCount}`);
+            }
+        }
+    };
+
+    ws.onclose = () => {
+        console.log("Conexión perdida con Streamer.bot. Reintentando en 5 segundos...");
+        setTimeout(connectStreamerBot, 5000);
+    };
+
+    ws.error = (error) => {
+        console.error("Error en el WebSocket:", error);
+    };
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    connectStreamerBot();
 });
