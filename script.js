@@ -165,6 +165,18 @@ function connectStreamerBot() {
 
     ws.onopen = () => {
         console.log("Conectado correctamente a Streamer.bot por WebSocket 🚀");
+
+        // ¡ESTO ES LO QUE FALTABA! Pedirle a Streamer.bot que envíe los eventos de Twitch
+        const subscribeMessage = {
+            "request": "Subscribe",
+            "events": {
+                "Twitch": [
+                    "RewardRedemption"
+                ]
+            },
+            "id": "eggs-sub-1"
+        };
+        ws.send(JSON.stringify(subscribeMessage));
     };
 
     ws.onmessage = (event) => {
@@ -175,6 +187,7 @@ function connectStreamerBot() {
             let textoAAnalizar = "";
             let username = "Usuario";
 
+            // 1. Extraer el texto según si viene de un RewardRedemption o un mensaje de Chat
             if (message.data && message.data.reward && message.data.reward.title) {
                 textoAAnalizar = message.data.reward.title.toLowerCase();
                 if (message.data.user && message.data.user.name) username = message.data.user.name;
@@ -183,6 +196,7 @@ function connectStreamerBot() {
                 if (message.data.message.user && message.data.message.user.name) username = message.data.message.user.name;
             }
 
+            // 2. Determinar la rareza del huevo
             let eggType = null;
             if (textoAAnalizar.includes("roto")) eggType = "roto";
             else if (textoAAnalizar.includes("poco comun") || textoAAnalizar.includes("poco común") || textoAAnalizar.includes("pcomun")) eggType = "pcomun";
@@ -191,6 +205,7 @@ function connectStreamerBot() {
             else if (textoAAnalizar.includes("epico") || textoAAnalizar.includes("épico")) eggType = "epico";
             else if (textoAAnalizar.includes("legendario")) eggType = "legendario";
 
+            // 3. Sumar el contador y actualizar la pantalla
             if (eggType) {
                 const storageKey = `cnt-${eggType}`;
                 let currentCount = parseInt(localStorage.getItem(storageKey)) || 0;
