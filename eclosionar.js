@@ -1,4 +1,8 @@
+const CLIENT_ID = 'TU_CLIENT_ID_DE_TWITCH';
+const tiposHuevos = ['roto', 'comun', 'pcomun', 'raro', 'epico', 'legendario'];
+
 document.addEventListener("DOMContentLoaded", () => {
+    // 1. Tema claro / oscuro
     const themeToggleBtn = document.getElementById("theme-toggle");
     const themeIcon = document.getElementById("theme-icon");
     const currentTheme = localStorage.getItem("theme") || "dark";
@@ -26,14 +30,24 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // 2. Menú de usuario
+    const usernameContainer = document.getElementById("top-username-container");
+    const userDropdown = document.getElementById("user-dropdown");
+
+    if (usernameContainer && userDropdown) {
+        usernameContainer.addEventListener("click", (e) => {
+            e.stopPropagation();
+            userDropdown.classList.toggle("show");
+        });
+        window.addEventListener("click", () => {
+            userDropdown.classList.remove("show");
+        });
+    }
+
+    // 3. Fondo Flotante Animado
     const bgContainer = document.getElementById("bg-eggs");
     const eggImages = [
-        'imagenes/huevo-roto.png',
-        'imagenes/huevo-comun.png',
-        'imagenes/huevo-poco-comun.png',
-        'imagenes/huevo-raro.png',
-        'imagenes/huevodragonu.png',
-        'imagenes/huevo-legendario.png'
+        'imagenes/huevodragonu.png'
     ];
     
     function createFloatingEgg() {
@@ -45,7 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const size = Math.floor(Math.random() * 30) + 30;
         img.style.width = `${size}px`;
         img.style.height = `${size}px`;
-        img.style.left = `${Math.random() * 100}vw`;
+        img.style.left = `${Math.random() * 95}vw`;
         
         const duration = Math.random() * 6 + 6;
         img.style.animationDuration = `${duration}s`;
@@ -55,11 +69,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     setInterval(createFloatingEgg, 800);
 
+    // 4. Lógica de Eclosión Aleatoria
     const hatchBtn = document.getElementById("hatch-btn");
     const eggDisplay = document.getElementById("egg-display");
     const resultDiv = document.getElementById("hatch-result");
-
-    const tiposHuevos = ['roto', 'comun', 'pcomun', 'raro', 'epico', 'legendario'];
 
     const rewardsMap = {
         roto: ["💩", "🪨", "🦴", "💨"],
@@ -70,16 +83,19 @@ document.addEventListener("DOMContentLoaded", () => {
             { name: "2.500 Dragonus", img: "imagenes/huevodragonu.png" },
         ],
         legendario: [
-            { name: "Cofre de Streamloots", img: "imagenes/cofre.png" },
+            { name: "Cofre de Streamloots", img: "imagenes/huevodragonu.png" },
             { name: "10.000 Dragonus", img: "imagenes/huevodragonu.png" },
-            { name: "VIP 1 Semana (Si ya eres VIP, se cambia por 2 cofres)", img: "imagenes/vip.png" }
+            { name: "VIP 1 Semana", img: "imagenes/huevodragonu.png" }
         ]
     };
 
     if (hatchBtn) {
         hatchBtn.addEventListener("click", () => {
+            const currentUser = localStorage.getItem("current_twitch_user") || "default";
+
             let availableEggs = tiposHuevos.filter(tipo => {
-                let count = parseInt(localStorage.getItem(`cnt-${tipo}`)) || 0;
+                const storageKey = currentUser !== "default" ? `cnt-${currentUser}-${tipo}` : `cnt-${tipo}`;
+                let count = parseInt(localStorage.getItem(storageKey)) || 0;
                 return count > 0;
             });
 
@@ -91,7 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const selectedEgg = availableEggs[Math.floor(Math.random() * availableEggs.length)];
             
-            const storageKey = `cnt-${selectedEgg}`;
+            const storageKey = currentUser !== "default" ? `cnt-${currentUser}-${selectedEgg}` : `cnt-${selectedEgg}`;
             let currentCount = parseInt(localStorage.getItem(storageKey)) || 0;
 
             currentCount--;
@@ -99,11 +115,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
             hatchBtn.disabled = true;
 
-            resultDiv.textContent = `¡Eclosionando un Huevo ${selectedEgg.toUpperCase()}... !`;
+            resultDiv.textContent = `¡Eclosionando un Huevo ${selectedEgg.toUpperCase()}...!`;
             resultDiv.style.color = "var(--count-color)";
-            eggDisplay.textContent = "🥚";
-
-            eggDisplay.classList.add("shaking");
+            
+            // Ponemos el huevo inicial en tamaño perfecto y activamos la sacudida
+            eggDisplay.innerHTML = "🥚";
+            eggDisplay.className = "egg-visual shaking";
             
             setTimeout(() => {
                 resultDiv.textContent = "¡El huevo está temblando!";
@@ -137,21 +154,37 @@ document.addEventListener("DOMContentLoaded", () => {
                         });
                     }
 
-                    const historyItem = {
-                        egg: selectedEgg.toUpperCase(),
-                        prize: typeof finalPrize === 'object' ? finalPrize.name : finalPrize,
-                        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                    };
-
-                    let history = JSON.parse(localStorage.getItem("egg-history")) || [];
-                    history.unshift(historyItem); 
-                    if (history.length > 5) history.pop(); 
-                    localStorage.setItem("egg-history", JSON.stringify(history));
-
                     hatchBtn.disabled = false;
                 }, 300);
 
             }, 3500);
         });
     }
+
+    checkTwitchLoginEclosion();
 });
+
+function checkTwitchLoginEclosion() {
+    const savedUser = localStorage.getItem("current_twitch_user");
+    const displayUsername = document.getElementById("display-username");
+    const authBtn = document.getElementById("auth-action-btn");
+
+    if (savedUser && savedUser !== "default") {
+        if (displayUsername) displayUsername.textContent = savedUser;
+        if (authBtn) {
+            authBtn.textContent = "🚪 Cerrar sesión";
+            authBtn.onclick = (e) => {
+                e.preventDefault();
+                localStorage.removeItem('twitch_token');
+                localStorage.removeItem('current_twitch_user');
+                window.location.reload();
+            };
+        }
+    } else {
+        if (displayUsername) displayUsername.textContent = "Invitado";
+        if (authBtn) {
+            authBtn.textContent = "Iniciar sesión con Twitch";
+            authBtn.href = `https://id.twitch.tv/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(window.location.origin + window.location.pathname)}&response_type=token&scope=user:read:email`;
+        }
+    }
+}

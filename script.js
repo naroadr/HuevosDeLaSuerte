@@ -1,10 +1,6 @@
+const CLIENT_ID = 'TU_CLIENT_ID_DE_TWITCH'; // Pon tu Client ID cuando lo tengas
+const REDIRECT_URI = window.location.origin + window.location.pathname;
 const tiposHuevos = ['roto', 'comun', 'pcomun', 'raro', 'epico', 'legendario'];
-
-tiposHuevos.forEach(tipo => {
-    const count = localStorage.getItem(`cnt-${tipo}`) || 0;
-    const el = document.getElementById(`cnt-${tipo}`);
-    if (el) el.textContent = count;
-});
 
 document.addEventListener("DOMContentLoaded", () => {
     // 1. Modo claro / oscuro
@@ -35,42 +31,28 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 2. Fondo animado de huevos 
-    const bgContainer = document.getElementById("bg-eggs");
-    const eggImages = [
-        'imagenes/huevo-roto.png',
-        'imagenes/huevo-comun.png',
-        'imagenes/huevo-poco-comun.png',
-        'imagenes/huevo-raro.png',
-        'imagenes/huevodragonu.png',
-        'imagenes/huevo-legendario.png'
-    ];
-    
-    function createFloatingEgg() {
-        if (!bgContainer) return;
-        const img = document.createElement("img");
-        img.src = eggImages[Math.floor(Math.random() * eggImages.length)];
-        img.classList.add("bg-floating-egg");
-        
-        const size = Math.floor(Math.random() * 30) + 30;
-        img.style.width = `${size}px`;
-        img.style.height = `${size}px`;
-        img.style.left = `${Math.random() * 100}vw`;
-        
-        const duration = Math.random() * 6 + 6;
-        img.style.animationDuration = `${duration}s`;
-        
-        bgContainer.appendChild(img);
-        setTimeout(() => img.remove(), duration * 1000);
+    // 2. Control del menú desplegable del usuario
+    const usernameContainer = document.getElementById("top-username-container");
+    const userDropdown = document.getElementById("user-dropdown");
+
+    if (usernameContainer && userDropdown) {
+        usernameContainer.addEventListener("click", (e) => {
+            e.stopPropagation();
+            userDropdown.classList.toggle("show");
+        });
+
+        window.addEventListener("click", () => {
+            userDropdown.classList.remove("show");
+        });
     }
-    setInterval(createFloatingEgg, 800);
 
     // 3. Botones manuales para sumar huevos (+1)
     const addButtons = document.querySelectorAll(".add-egg-btn");
     addButtons.forEach(button => {
         button.addEventListener("click", () => {
             const eggType = button.getAttribute("data-egg");
-            const storageKey = `cnt-${eggType}`;
+            const currentUser = localStorage.getItem("current_twitch_user") || "default";
+            const storageKey = currentUser !== "default" ? `cnt-${currentUser}-${eggType}` : `cnt-${eggType}`;
             
             let currentCount = parseInt(localStorage.getItem(storageKey)) || 0;
             currentCount++;
@@ -83,34 +65,117 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // 4. Modal de funcionamiento / guía
+    // 4. Modal de guía
     const openGuideBtn = document.getElementById("open-guide-btn");
     const closeGuideBtn = document.getElementById("close-guide-btn");
     const guideModal = document.getElementById("guide-modal");
 
     if (openGuideBtn && guideModal) {
-        openGuideBtn.addEventListener("click", () => {
-            guideModal.style.display = "flex";
-        });
+        openGuideBtn.addEventListener("click", () => { guideModal.style.display = "flex"; });
     }
-
     if (closeGuideBtn && guideModal) {
-        closeGuideBtn.addEventListener("click", () => {
-            guideModal.style.display = "none";
-        });
+        closeGuideBtn.addEventListener("click", () => { guideModal.style.display = "none"; });
     }
-
     window.addEventListener("click", (event) => {
-        if (event.target === guideModal) {
-            guideModal.style.display = "none";
-        }
+        if (event.target === guideModal) guideModal.style.display = "none";
     });
 
-    // Inicializar conexión WebSocket
+    // 5. Autenticación y WebSocket
+    checkTwitchLogin();
     connectStreamerBot();
 });
 
-// Función de conexión al WebSocket de Streamer.bot
+// Comprobar inicio de sesión con Twitch
+function checkTwitchLogin() {
+    const hash = window.location.hash.substring(1);
+    const params = new URLSearchParams(hash);
+    const accessToken = params.get('access_token');
+
+    if (accessToken) {
+        localStorage.setItem('twitch_token', accessToken);
+        window.location.hash = ''; 
+        fetchTwitchUser(accessToken);
+    } else {
+        const savedToken = localStorage.getItem('twitch_token');
+        if (savedToken) {
+            fetchTwitchUser(savedToken);
+        } else {
+            configurarEstadoInvitado();
+        }
+    }
+}
+
+async function fetchTwitchUser(token) {
+    try {
+        const response = await fetch('https://api.twitch.tv/helix/users', {
+            headers: {
+                'Client-ID': CLIENT_ID,
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        const data = await response.json();
+        if (data.data && data.data.length > 0) {
+            const user = data.data[0];
+            localStorage.setItem("current_twitch_user", user.login);
+            
+            // Actualizar nombre en la esquina superior izquierda
+            const displayUsername = document.getElementById("display-username");
+            if (displayUsername) displayUsername.textContent = user.display_name;
+
+            const titleEl = document.getElementById("user-title");
+            if (titleEl) {
+                titleEl.innerHTML = `Inventario de recompensas de <strong>${user.display_name}</strong>`;
+            }
+            
+            // Cambiar opción del menú desplegable a "Cerrar sesión"
+            const authBtn = document.getElementById("auth-action-btn");
+            if (authBtn) {
+                authBtn.textContent = "🚪 Cerrar sesión";
+                authBtn.href = "#";
+                authBtn.onclick = (e) => {
+                    e.preventDefault();
+                    localStorage.removeItem('twitch_token');
+                    localStorage.removeItem('current_twitch_user');
+                    window.location.reload();
+                };
+            }
+
+            cargarInventarioUsuario(user.login);
+        } else {
+            throw new Error("Token no válido");
+        }
+    } catch (error) {
+        console.error("Error al obtener usuario:", error);
+        localStorage.removeItem('twitch_token');
+        localStorage.removeItem('current_twitch_user');
+        configurarEstadoInvitado();
+    }
+}
+
+function configurarEstadoInvitado() {
+    const displayUsername = document.getElementById("display-username");
+    if (displayUsername) displayUsername.textContent = "Invitado";
+
+    cargarInventarioUsuario("default");
+
+    const authBtn = document.getElementById("auth-action-btn");
+    if (authBtn) {
+        authBtn.textContent = "Iniciar sesión con Twitch";
+        authBtn.href = `https://id.twitch.tv/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=user:read:email`;
+        authBtn.onclick = null;
+    }
+}
+
+function cargarInventarioUsuario(username) {
+    tiposHuevos.forEach(tipo => {
+        const storageKey = username !== "default" ? `cnt-${username}-${tipo}` : `cnt-${tipo}`;
+        const count = localStorage.getItem(storageKey) || 0;
+        const el = document.getElementById(`cnt-${tipo}`);
+        if (el) el.textContent = count;
+    });
+}
+
+// Conexión WebSocket con Streamer.bot
 function connectStreamerBot() {
     const ws = new WebSocket('ws://localhost:8080/');
 
@@ -118,10 +183,7 @@ function connectStreamerBot() {
         const subscribeMessage = {
             "request": "Subscribe",
             "events": {
-                "Twitch": [
-                    "RewardRedemption",
-                    "ChatMessage"
-                ]
+                "Twitch": ["RewardRedemption", "ChatMessage"]
             }
         };
         ws.send(JSON.stringify(subscribeMessage));
@@ -140,9 +202,7 @@ function connectStreamerBot() {
                 }
             }
             
-            if (!textoAAnalizar) {
-                textoAAnalizar = JSON.stringify(message).toLowerCase();
-            }
+            if (!textoAAnalizar) textoAAnalizar = JSON.stringify(message).toLowerCase();
 
             let eggType = null;
             if (textoAAnalizar.includes("roto")) eggType = "roto";
@@ -153,26 +213,21 @@ function connectStreamerBot() {
             else if (textoAAnalizar.includes("legendario")) eggType = "legendario";
 
             if (eggType) {
-                const storageKey = `cnt-${eggType}`;
+                const currentUser = localStorage.getItem("current_twitch_user") || "default";
+                const storageKey = currentUser !== "default" ? `cnt-${currentUser}-${eggType}` : `cnt-${eggType}`;
+                
                 let currentCount = parseInt(localStorage.getItem(storageKey)) || 0;
                 currentCount++;
                 localStorage.setItem(storageKey, currentCount);
 
                 const counterElement = document.getElementById(`cnt-${eggType}`);
-                if (counterElement) {
-                    counterElement.textContent = currentCount;
-                }
+                if (counterElement) counterElement.textContent = currentCount;
             }
         } catch (e) {
-            console.error("Error al procesar el mensaje:", e);
+            console.error("Error al procesar mensaje de Streamer.bot:", e);
         }
     };
 
-    ws.onclose = () => {
-        setTimeout(connectStreamerBot, 5000);
-    };
-
-    ws.onerror = (error) => { 
-        console.error("Error en WebSocket:", error); 
-    };
+    ws.onclose = () => { setTimeout(connectStreamerBot, 5000); };
+    ws.onerror = (error) => { console.error("Error en WebSocket:", error); };
 }

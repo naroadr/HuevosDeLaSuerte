@@ -9,6 +9,17 @@
 </head>
 <body>
 
+    <!-- Menú de usuario en la esquina superior izquierda -->
+    <div class="user-menu-container">
+        <div id="top-username-container" class="top-username">
+            👤 <span id="display-username">Invitado</span> ▼
+        </div>
+        <div id="user-dropdown" class="dropdown-menu">
+            <a href="#" id="auth-action-btn">Iniciar sesión con Twitch</a>
+        </div>
+    </div>
+    
+    <!-- Botón de modo claro/oscuro en la esquina superior derecha -->
     <button id="theme-toggle" class="theme-toggle-btn" title="Cambiar modo claro/oscuro">
         <img id="theme-icon" src="imagenes/luna.png" alt="Cambiar tema">
     </button>
@@ -19,21 +30,24 @@
     </header>
 
     <main class="hatch-main">
-        <!-- Huevo eclosión aleatorio -->
+        <!-- Eclosión -->
         <div class="hatch-arena">
             <div id="egg-container" class="pokemon-egg-wrapper">
                 <div id="egg-display" class="egg-visual">🥚</div>
             </div>
-            <button id="hatch-btn" class="guide-btn">¡ECLOSIONAR UN HUEVO!</button>
+            
+            <button id="hatch-btn" class="guide-btn">¡ECLOSIONAR HUEVO!</button>
             <div id="hatch-result" class="slot-result"></div>
-        </div>
 
-        <div class="back-link-container">
-            <a href="index.html" class="nav-btn">Volver al Inventario</a>
+            <div class="back-link-container">
+                <a href="index.html" class="nav-btn">Volver al Inventario</a>
+            </div>
         </div>
     </main>
 
+    <!-- Contenedor para el fondo de huevos flotantes -->
     <div class="bg-eggs-container" id="bg-eggs"></div>
+
     <script src="eclosionar.js"></script>
 </body>
 </html>

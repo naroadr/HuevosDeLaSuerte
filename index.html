@@ -8,12 +8,19 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
-
-    <button id="theme-toggle" class="theme-toggle-btn" title="Cambiar modo claro/oscuro">
-        <img id="theme-icon" src="imagenes/luna.png" alt="Cambiar tema">
-    </button>
-
     <header>
+        <div class="user-menu-container">
+            <div id="top-username-container" class="top-username">
+                👤 <span id="display-username">Invitado</span> ▼
+            </div>
+            <div id="user-dropdown" class="dropdown-menu">
+                <a href="#" id="auth-action-btn">Iniciar sesión con Twitch</a>
+            </div>
+        </div>
+        
+        <button id="theme-toggle" class="theme-toggle-btn" title="Cambiar modo claro/oscuro">
+            <img id="theme-icon" src="imagenes/luna.png" alt="Cambiar tema">
+        </button>
         <h1>🥚 Colección de Huevos de la Suerte 🥚</h1>
         <p class="subtitle" id="user-title">Inventario de recompensas del canal de <strong>RyuuzZ_</strong></p>
     </header>

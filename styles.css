@@ -38,8 +38,116 @@ body {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* --- MENÚ DESPLEGABLE DE USUARIO (ESQUINA SUPERIOR IZQUIERDA) --- */
+.user-menu-container {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 100;
+}
+
+.top-username {
+    background-color: var(--card-bg);
+    border: 2px solid var(--card-border);
+    padding: 8px 16px;
+    border-radius: 25px;
+    font-size: 0.95rem;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
+    transition: border-color 0.2s;
+}
+
+.top-username:hover {
+    border-color: #a855f7;
+}
+
+/* Contenido del menú desplegable */
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 50px;
+    left: 0;
+    background-color: var(--card-bg);
+    border: 2px solid var(--card-border);
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    min-width: 180px;
+    overflow: hidden;
+    z-index: 101;
+    text-align: left;
+}
+
+.dropdown-menu.show {
+    display: block;
+    animation: fadeInDropdown 0.2s ease-in-out;
+}
+
+@keyframes fadeInDropdown {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.dropdown-menu a {
+    display: block;
+    padding: 10px 15px;
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+}
+
+.dropdown-menu a:hover {
+    background-color: rgba(168, 85, 247, 0.15);
+    color: #a855f7;
+}
+
+/* --- BOTÓN DE MODO CLARO/OSCURO FIJO EN LA ESQUINA SUPERIOR DERECHA --- */
+.theme-toggle-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--card-bg);
+    border: 2px solid var(--card-border);
+    color: var(--text-color);
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    transition: transform 0.2s, background-color 0.3s;
+    z-index: 100;
+}
+
+.theme-toggle-btn:hover {
+    transform: scale(1.1);
+    border-color: #a855f7;
+}
+
+#theme-icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+    filter: brightness(0) invert(1);
+}
+
+[data-theme="light"] #theme-icon {
+    filter: none;
+}
+
 header {
     margin-bottom: 40px;
+    position: relative;
 }
 
 h1 {
@@ -70,11 +178,13 @@ h1 {
     box-shadow: 0 8px 16px var(--card-shadow);
     transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, color 0.3s ease;
 }
+
 .card-img {
     width: 50px;
     height: 50px;
     object-fit: contain;
 }
+
 .card:hover {
     transform: translateY(-8px);
     border-color: #a855f7;
@@ -98,6 +208,7 @@ h1 {
     color: var(--count-color);
     font-weight: 800;
 }
+
 /* Boton de añadir huevos */ 
 .add-egg-btn {
     margin-top: 12px;
@@ -123,7 +234,78 @@ h1 {
     transform: translateY(0);
     box-shadow: 0 2px 5px rgba(124, 58, 237, 0.3);
 }
-/* animacion del huevo y textos mas grandes */
+
+/* --- ARENA Y ANIMACIONES DE ECLOSIÓN CORREGIDAS --- */
+.hatch-main {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.hatch-arena {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+.pokemon-egg-wrapper {
+    height: 200px;
+    width: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 10px auto;
+}
+
+.egg-visual {
+    font-size: 120px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    user-select: none;
+}
+
+/* Control estricto del tamaño de imágenes de premio para que no salgan gigantes */
+.egg-visual img, 
+.prize-img {
+    max-width: 150px !important;
+    max-height: 150px !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain;
+    animation: prizePopIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Animación de sacudida de Pokémon */
+@keyframes pokemonShake {
+    0% { transform: rotate(0deg) scale(1); }
+    20% { transform: rotate(-15deg) scale(1.1); }
+    40% { transform: rotate(15deg) scale(1.1); }
+    60% { transform: rotate(-10deg) scale(1.05); }
+    80% { transform: rotate(10deg) scale(1.05); }
+    100% { transform: rotate(0deg) scale(1); }
+}
+
+.shaking {
+    animation: pokemonShake 0.4s ease infinite !important;
+}
+
+/* Animación de salto final al eclosionar */
+@keyframes hatchPop {
+    0% { transform: scale(1); filter: brightness(1); }
+    50% { transform: scale(1.4); filter: brightness(2); }
+    100% { transform: scale(1); filter: brightness(1); }
+}
+
+.hatching-pop {
+    animation: hatchPop 0.5s ease;
+}
+
+/* Textos grandes en resultados de eclosión */
 #hatch-result strong {
     font-size: 1.4rem;
     display: inline-block;
@@ -140,6 +322,43 @@ h1 {
         transform: scale(1);
     }
 }
+
+/* --- FONDO DE HUEVOS FLOTANTES --- */
+.bg-eggs-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.bg-floating-egg {
+    position: absolute;
+    bottom: -80px;
+    opacity: 0.15;
+    animation: floatUpRandom linear forwards;
+}
+
+@keyframes floatUpRandom {
+    0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0;
+    }
+    15% {
+        opacity: 0.2;
+    }
+    85% {
+        opacity: 0.2;
+    }
+    100% {
+        transform: translateY(-110vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
 /* Colores personalizados para las rarezas de los huevos */
 .rarity-roto { color: var(--subtitle-color); }
 .rarity-comun { color: var(--text-color); }
@@ -148,16 +367,6 @@ h1 {
 .rarity-epico { color: #9333ea; }
 .rarity-legendario { color: #ca8a04; text-shadow: 0 0 10px rgba(250, 204, 21, 0.4); }
 
-/* Animación de brillo intermitente para cartas legendarias */
-@keyframes legendaryGlow {
-    0% { box-shadow: 0 0 10px rgba(202, 138, 4, 0.2); border-color: #ca8a04; }
-    50% { box-shadow: 0 0 25px rgba(202, 138, 4, 0.6); border-color: #facc15; }
-    100% { box-shadow: 0 0 10px rgba(202, 138, 4, 0.2); border-color: #ca8a04; }
-}
-
-.card-legendary {
-    animation: legendaryGlow 3s infinite ease-in-out;
-}
 /* Estilos para el Historial */
 .history-section {
     max-width: 900px;
@@ -197,6 +406,7 @@ h1 {
     justify-content: space-between;
     align-items: center;
 }
+
 /* BOTÓN DE FUNCIONAMIENTO DE HUEVOS */
 .info-section {
     margin-top: 40px;
@@ -329,168 +539,24 @@ code {
     box-shadow: 0 6px 18px rgba(168, 85, 247, 0.4);
 }
 
-/* Estilos de huevo de la eclosión (Huevo central más grande) */
-.pokemon-egg-wrapper {
-    height: 220px; 
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 20px 0;
-}
-
-.egg-visual {
-    font-size: 140px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.1s ease;
-    user-select: none;
-}
-
-/* Imagen de eclosión principal más grande */
-.egg-visual img {
-    width: 170px;
-    height: 170px;
-    object-fit: contain;
-}
-
-/* Animación de sacudida Pokémon */
-@keyframes pokemonShake {
-    0% { transform: rotate(0deg) scale(1); }
-    20% { transform: rotate(-18deg) scale(1.1); }
-    40% { transform: rotate(18deg) scale(1.1); }
-    60% { transform: rotate(-12deg) scale(1.05); }
-    80% { transform: rotate(12deg) scale(1.05); }
-    100% { transform: rotate(0deg) scale(1); }
-}
-
-.shaking {
-    animation: pokemonShake 0.35s ease infinite;
-}
-
-/* Animación de salto final al abrirse */
-@keyframes hatchPop {
-    0% { transform: scale(1); filter: brightness(1); }
-    50% { transform: scale(1.5); filter: brightness(2.5); }
-    100% { transform: scale(1); filter: brightness(1); }
-}
-
-.hatching-pop {
-    animation: hatchPop 0.5s ease;
-}
-
-
-/* Animación del fondo (Huevos flotantes más sutiles y transparentes) */
-.bg-eggs-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-    pointer-events: none;
-    overflow: hidden;
-}
-
-.bg-floating-egg {
-    position: absolute;
-    bottom: -100px;
-    opacity: 0.15; /* Reducida la opacidad para que sean más discretos y transparentes */
-    animation: floatUpRandom linear infinite;
-}
-
-@keyframes floatUpRandom {
-    0% {
-        transform: translateY(0) rotate(0deg);
-        opacity: 0;
-    }
-    15% {
-        opacity: 0.18;
-    }
-    85% {
-        opacity: 0.18;
-    }
-    100% {
-        transform: translateY(-120vh) rotate(360deg);
-        opacity: 0;
-    }
-}
-
-/* Botón Modo claro/oscuro */
-.theme-toggle-btn {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: var(--card-bg);
-    border: 2px solid var(--card-border);
-    color: var(--text-color);
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    font-size: 20px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    transition: transform 0.2s, background-color 0.3s;
-    z-index: 50;
-}
-
-.theme-toggle-btn:hover {
-    transform: scale(1.1);
-    border-color: #a855f7;
-}
-
-#theme-icon {
-    width: 26px;
-    height: 26px;
-    object-fit: contain;
-    transition: transform 0.3s ease;
-    filter: brightness(0) invert(1); /* Luna blanca en modo oscuro */
-}
-
-[data-theme="light"] #theme-icon {
-    filter: none; /* Sol negro en modo claro */
-}
-
 /* RESPONSIVE */
-@media (max-width: 768px) {
-    body {
-        padding: 20px 10px;
-    }
-
-    h1 {
-        font-size: 2rem; 
-    }
-
-    .grid {
-        grid-template-columns: repeat(2, 1fr); 
-        gap: 15px;
-    }
-
-    .modal-content {
-        width: 95%;
-        margin: 10% auto;
-        padding: 20px;
-    }
-}
-
 @media (max-width: 480px) {
+    .top-username {
+        font-size: 0.8rem;
+        padding: 6px 12px;
+    }
+    .user-menu-container {
+        top: 10px;
+        left: 10px;
+    }
+    .theme-toggle-btn {
+        width: 40px;
+        height: 40px;
+        top: 10px;
+        right: 10px;
+    }
     h1 {
         font-size: 1.6rem;
-    }
-
-    .subtitle {
-        font-size: 0.95rem;
-    }
-
-    .grid {
-        grid-template-columns: 1fr; 
-        max-width: 320px;
-    }
-
-    .card {
-        padding: 20px 15px;
+        margin-top: 30px;
     }
 }
