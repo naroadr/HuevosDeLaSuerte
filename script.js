@@ -1,6 +1,5 @@
 const tiposHuevos = ['roto', 'comun', 'pcomun', 'raro', 'epico', 'legendario'];
 
-// Cargar contadores guardados al abrir la página
 tiposHuevos.forEach(tipo => {
     const count = localStorage.getItem(`cnt-${tipo}`) || 0;
     const el = document.getElementById(`cnt-${tipo}`);
@@ -43,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
         'imagenes/huevo-comun.png',
         'imagenes/huevo-poco-comun.png',
         'imagenes/huevo-raro.png',
-        'imagenes/huevo-epico.png',
+        'imagenes/huevodragonu.png',
         'imagenes/huevo-legendario.png'
     ];
     
@@ -53,12 +52,12 @@ document.addEventListener("DOMContentLoaded", () => {
         img.src = eggImages[Math.floor(Math.random() * eggImages.length)];
         img.classList.add("bg-floating-egg");
         
-        const size = Math.floor(Math.random() * 30) + 30; // 30px - 60px
+        const size = Math.floor(Math.random() * 30) + 30;
         img.style.width = `${size}px`;
         img.style.height = `${size}px`;
         img.style.left = `${Math.random() * 100}vw`;
         
-        const duration = Math.random() * 6 + 6; // 6s - 12s
+        const duration = Math.random() * 6 + 6;
         img.style.animationDuration = `${duration}s`;
         
         bgContainer.appendChild(img);
@@ -66,106 +65,56 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     setInterval(createFloatingEgg, 800);
 
-    // 3. Eclosión de huevo, Historial y Confeti
-    const hatchBtn = document.getElementById("hatch-btn");
-    const eggDisplay = document.getElementById("egg-display");
-    const eggSelect = document.getElementById("egg-type-select");
-    const resultDiv = document.getElementById("hatch-result");
-
-    const rewardsMap = {
-        roto: ["💩", "🪨", "🦴", "💨"],
-        comun: ["🌟", "🍪", "🪙", "💧"],
-        pcomun: ["🔮", "⚡", "🎁", "🍀"],
-        raro: ["💎", "🔥", "🚀", "🛡️"],
-        epico: ["👑", "🦄", "⭐", "💎"],
-        legendario: ["🏆", "🐉", "💎", "👑"]
-    };
-
-    if (hatchBtn) {
-        hatchBtn.addEventListener("click", () => {
-            const selectedEgg = eggSelect ? eggSelect.value : "comun";
+    // 3. Botones manuales para sumar huevos (+1)
+    const addButtons = document.querySelectorAll(".add-egg-btn");
+    addButtons.forEach(button => {
+        button.addEventListener("click", () => {
+            const eggType = button.getAttribute("data-egg");
+            const storageKey = `cnt-${eggType}`;
             
-            const storageKey = `cnt-${selectedEgg}`;
             let currentCount = parseInt(localStorage.getItem(storageKey)) || 0;
-
-            if (currentCount <= 0) {
-                resultDiv.textContent = "¡No te quedan huevos de este tipo para eclosionar!";
-                resultDiv.style.color = "#ef4444";
-                return;
-            }
-
-            currentCount--;
+            currentCount++;
             localStorage.setItem(storageKey, currentCount);
-            
-            const counterElement = document.getElementById(`cnt-${selectedEgg}`);
-            if (counterElement) counterElement.textContent = currentCount;
 
-            hatchBtn.disabled = true;
-            if (eggSelect) eggSelect.disabled = true;
+            const counterElement = document.getElementById(`cnt-${eggType}`);
+            if (counterElement) {
+                counterElement.textContent = currentCount;
+            }
+        });
+    });
 
-            resultDiv.textContent = "¿El huevo va a abrirse... ?";
-            resultDiv.style.color = "var(--count-color)";
-            eggDisplay.textContent = "🥚";
+    // 4. Modal de funcionamiento / guía
+    const openGuideBtn = document.getElementById("open-guide-btn");
+    const closeGuideBtn = document.getElementById("close-guide-btn");
+    const guideModal = document.getElementById("guide-modal");
 
-            eggDisplay.classList.add("shaking");
-            
-            setTimeout(() => {
-                resultDiv.textContent = "¡El huevo está temblando!";
-            }, 1500);
-
-            setTimeout(() => {
-                eggDisplay.classList.remove("shaking");
-                eggDisplay.classList.add("hatching-pop");
-
-                const possibleRewards = rewardsMap[selectedEgg] || rewardsMap["comun"];
-                const finalPrize = possibleRewards[Math.floor(Math.random() * possibleRewards.length)];
-
-                setTimeout(() => {
-                    eggDisplay.textContent = finalPrize;
-                    eggDisplay.classList.remove("hatching-pop");
-                    resultDiv.innerHTML = `¡Felicidades! Has conseguido: <strong>${finalPrize}</strong>`;
-                    resultDiv.style.color = "#16a34a";
-                    
-                    if (['epico', 'legendario'].includes(selectedEgg) && typeof confetti === 'function') {
-                        confetti({
-                            particleCount: 100,
-                            spread: 80,
-                            origin: { y: 0.6 },
-                            colors: ['#a855f7', '#ca8a04', '#0284c7', '#22c55e']
-                        });
-                    }
-
-                    const historyItem = {
-                        egg: selectedEgg.toUpperCase(),
-                        prize: finalPrize,
-                        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                    };
-
-                    let history = JSON.parse(localStorage.getItem("egg-history")) || [];
-                    history.unshift(historyItem); 
-                    if (history.length > 5) history.pop(); 
-                    localStorage.setItem("egg-history", JSON.stringify(history));
-
-                    hatchBtn.disabled = false;
-                    if (eggSelect) eggSelect.disabled = false;
-                }, 300);
-
-            }, 3500);
+    if (openGuideBtn && guideModal) {
+        openGuideBtn.addEventListener("click", () => {
+            guideModal.style.display = "flex";
         });
     }
+
+    if (closeGuideBtn && guideModal) {
+        closeGuideBtn.addEventListener("click", () => {
+            guideModal.style.display = "none";
+        });
+    }
+
+    window.addEventListener("click", (event) => {
+        if (event.target === guideModal) {
+            guideModal.style.display = "none";
+        }
+    });
 
     // Inicializar conexión WebSocket
     connectStreamerBot();
 });
 
-// Función de conexión al WebSocket de Streamer.bot con formato corregido
+// Función de conexión al WebSocket de Streamer.bot
 function connectStreamerBot() {
     const ws = new WebSocket('ws://localhost:8080/');
 
     ws.onopen = () => {
-        console.log("Conectado correctamente a Streamer.bot por WebSocket 🚀");
-
-        // Formato exacto de suscripción para Streamer.bot
         const subscribeMessage = {
             "request": "Subscribe",
             "events": {
@@ -175,18 +124,13 @@ function connectStreamerBot() {
                 ]
             }
         };
-        
         ws.send(JSON.stringify(subscribeMessage));
-        console.log("Petición de suscripción enviada a Streamer.bot 📡");
     };
 
     ws.onmessage = (event) => {
         try {
             const message = JSON.parse(event.data);
-            console.log("Mensaje recibido desde Streamer.bot:", message);
-
             let textoAAnalizar = "";
-            let username = "Usuario";
 
             if (message.data) {
                 if (message.data.reward && message.data.reward.title) {
@@ -194,15 +138,8 @@ function connectStreamerBot() {
                 } else if (message.data.message && message.data.message.message) {
                     textoAAnalizar = message.data.message.message.toLowerCase();
                 }
-
-                if (message.data.user && message.data.user.name) {
-                    username = message.data.user.name;
-                } else if (message.data.message && message.data.message.user && message.data.message.user.name) {
-                    username = message.data.message.user.name;
-                }
             }
             
-            // Analizar toda la cadena si no se extrajo de forma directa
             if (!textoAAnalizar) {
                 textoAAnalizar = JSON.stringify(message).toLowerCase();
             }
@@ -225,20 +162,17 @@ function connectStreamerBot() {
                 if (counterElement) {
                     counterElement.textContent = currentCount;
                 }
-
-                console.log(`¡${username} consiguió un huevo tipo [${eggType}]! Total actual: ${currentCount}`);
             }
         } catch (e) {
-            console.error("Error al procesar el mensaje de Streamer.bot:", e);
+            console.error("Error al procesar el mensaje:", e);
         }
     };
 
     ws.onclose = () => {
-        console.log("Conexión perdida con Streamer.bot. Reintentando en 5 segundos...");
         setTimeout(connectStreamerBot, 5000);
     };
 
     ws.onerror = (error) => { 
-        console.error("Error en el WebSocket:", error); 
+        console.error("Error en WebSocket:", error); 
     };
 }

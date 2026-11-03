@@ -98,7 +98,48 @@ h1 {
     color: var(--count-color);
     font-weight: 800;
 }
+/* Boton de añadir huevos */ 
+.add-egg-btn {
+    margin-top: 12px;
+    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+    color: #ffffff;
+    border: none;
+    padding: 6px 14px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 4px 10px rgba(124, 58, 237, 0.3);
+}
 
+.add-egg-btn:hover {
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(124, 58, 237, 0.5);
+}
+
+.add-egg-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(124, 58, 237, 0.3);
+}
+/* animacion del huevo y textos mas grandes */
+#hatch-result strong {
+    font-size: 1.4rem;
+    display: inline-block;
+    animation: prizePopIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes prizePopIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
 /* Colores personalizados para las rarezas de los huevos */
 .rarity-roto { color: var(--subtitle-color); }
 .rarity-comun { color: var(--text-color); }

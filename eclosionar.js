@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. modo claro / oscuro
     const themeToggleBtn = document.getElementById("theme-toggle");
     const themeIcon = document.getElementById("theme-icon");
     const currentTheme = localStorage.getItem("theme") || "dark";
@@ -27,10 +26,14 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 2. Fondo animado de huevos 
     const bgContainer = document.getElementById("bg-eggs");
     const eggImages = [
+        'imagenes/huevo-roto.png',
+        'imagenes/huevo-comun.png',
+        'imagenes/huevo-poco-comun.png',
+        'imagenes/huevo-raro.png',
         'imagenes/huevodragonu.png',
+        'imagenes/huevo-legendario.png'
     ];
     
     function createFloatingEgg() {
@@ -39,12 +42,12 @@ document.addEventListener("DOMContentLoaded", () => {
         img.src = eggImages[Math.floor(Math.random() * eggImages.length)];
         img.classList.add("bg-floating-egg");
         
-        const size = Math.floor(Math.random() * 30) + 30; // 30px - 60px
+        const size = Math.floor(Math.random() * 30) + 30;
         img.style.width = `${size}px`;
         img.style.height = `${size}px`;
         img.style.left = `${Math.random() * 100}vw`;
         
-        const duration = Math.random() * 6 + 6; // 6s - 12s
+        const duration = Math.random() * 6 + 6;
         img.style.animationDuration = `${duration}s`;
         
         bgContainer.appendChild(img);
@@ -52,41 +55,51 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     setInterval(createFloatingEgg, 800);
 
-    // 3. Eclosion de huevo
     const hatchBtn = document.getElementById("hatch-btn");
     const eggDisplay = document.getElementById("egg-display");
-    const eggSelect = document.getElementById("egg-type-select");
     const resultDiv = document.getElementById("hatch-result");
+
+    const tiposHuevos = ['roto', 'comun', 'pcomun', 'raro', 'epico', 'legendario'];
 
     const rewardsMap = {
         roto: ["💩", "🪨", "🦴", "💨"],
         comun: ["🌟", "🍪", "🪙", "💧"],
         pcomun: ["🔮", "⚡", "🎁", "🍀"],
         raro: ["💎", "🔥", "🚀", "🛡️"],
-        epico: ["👑", "🦄", "⭐", "💎"],
-        legendario: ["🏆", "🐉", "💎", "👑"]
+        epico: [            
+            { name: "2.500 Dragonus", img: "imagenes/huevodragonu.png" },
+        ],
+        legendario: [
+            { name: "Cofre de Streamloots", img: "imagenes/cofre.png" },
+            { name: "10.000 Dragonus", img: "imagenes/huevodragonu.png" },
+            { name: "VIP 1 Semana (Si ya eres VIP, se cambia por 2 cofres)", img: "imagenes/vip.png" }
+        ]
     };
 
     if (hatchBtn) {
         hatchBtn.addEventListener("click", () => {
-            const selectedEgg = eggSelect ? eggSelect.value : "comun";
-            
-            const storageKey = `cnt-${selectedEgg}`;
-            let currentCount = parseInt(localStorage.getItem(storageKey)) || 0;
+            let availableEggs = tiposHuevos.filter(tipo => {
+                let count = parseInt(localStorage.getItem(`cnt-${tipo}`)) || 0;
+                return count > 0;
+            });
 
-            if (currentCount <= 0) {
-                resultDiv.textContent = "¡No te quedan huevos de este tipo para eclosionar!";
+            if (availableEggs.length === 0) {
+                resultDiv.textContent = "¡No te quedan huevos de ningún tipo para eclosionar!";
                 resultDiv.style.color = "#ef4444";
                 return;
             }
+
+            const selectedEgg = availableEggs[Math.floor(Math.random() * availableEggs.length)];
+            
+            const storageKey = `cnt-${selectedEgg}`;
+            let currentCount = parseInt(localStorage.getItem(storageKey)) || 0;
 
             currentCount--;
             localStorage.setItem(storageKey, currentCount);
 
             hatchBtn.disabled = true;
-            if (eggSelect) eggSelect.disabled = true;
 
-            resultDiv.textContent = "¿El huevo va a abrirse... ?";
+            resultDiv.textContent = `¡Eclosionando un Huevo ${selectedEgg.toUpperCase()}... !`;
             resultDiv.style.color = "var(--count-color)";
             eggDisplay.textContent = "🥚";
 
@@ -104,36 +117,41 @@ document.addEventListener("DOMContentLoaded", () => {
                 const finalPrize = possibleRewards[Math.floor(Math.random() * possibleRewards.length)];
 
                 setTimeout(() => {
-                    eggDisplay.textContent = finalPrize;
+                    if (typeof finalPrize === 'object') {
+                        eggDisplay.innerHTML = `<img src="${finalPrize.img}" alt="${finalPrize.name}" class="prize-img">`;
+                        resultDiv.innerHTML = `¡Felicidades! Has conseguido:<br><strong>${finalPrize.name}</strong>`;
+                    } else {
+                        eggDisplay.textContent = finalPrize;
+                        resultDiv.innerHTML = `¡Felicidades! Has conseguido: <strong>${finalPrize}</strong>`;
+                    }
+
                     eggDisplay.classList.remove("hatching-pop");
-                    resultDiv.innerHTML = `¡Felicidades! Has conseguido: <strong>${finalPrize}</strong>`;
                     resultDiv.style.color = "#16a34a";
                     
+                    if (['epico', 'legendario'].includes(selectedEgg) && typeof confetti === 'function') {
+                        confetti({
+                            particleCount: 100,
+                            spread: 80,
+                            origin: { y: 0.6 },
+                            colors: ['#a855f7', '#ca8a04', '#0284c7', '#22c55e']
+                        });
+                    }
+
+                    const historyItem = {
+                        egg: selectedEgg.toUpperCase(),
+                        prize: typeof finalPrize === 'object' ? finalPrize.name : finalPrize,
+                        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    };
+
+                    let history = JSON.parse(localStorage.getItem("egg-history")) || [];
+                    history.unshift(historyItem); 
+                    if (history.length > 5) history.pop(); 
+                    localStorage.setItem("egg-history", JSON.stringify(history));
+
                     hatchBtn.disabled = false;
-                    if (eggSelect) eggSelect.disabled = false;
                 }, 300);
 
             }, 3500);
         });
     }
 });
-// 4. Historial de eclosiones
-setTimeout(() => {
-    eggDisplay.textContent = finalPrize;
-    eggDisplay.classList.remove("hatching-pop");
-    resultDiv.innerHTML = `¡Felicidades! Has conseguido: <strong>${finalPrize}</strong>`;
-    resultDiv.style.color = "#16a34a";
-                    
-    const historyItem = {
-        egg: selectedEgg.toUpperCase(),
-        prize: finalPrize,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
-
-    let history = JSON.parse(localStorage.getItem("egg-history")) || [];
-    history.unshift(historyItem); 
-    if (history.length > 5) history.pop(); 
-    localStorage.setItem("egg-history", JSON.stringify(history));
-    hatchBtn.disabled = false;
-    if (eggSelect) eggSelect.disabled = false;
-}, 300);

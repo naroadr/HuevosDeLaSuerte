@@ -19,30 +19,17 @@
     </header>
 
     <main class="hatch-main">
-        <!-- Selector del tipo de huevo a eclosionar -->
-        <div class="egg-selector">
-            <label for="egg-type-select" class="subtitle">Elige el huevo a abrir:</label>
-            <select id="egg-type-select" class="guide-btn" style="cursor: pointer; margin-left: 10px;">
-                <option value="roto">Huevos Rotos</option>
-                <option value="comun">Huevos Comunes</option>
-                <option value="pcomun">Huevos Poco Comunes</option>
-                <option value="raro">Huevos Raros</option>
-                <option value="epico">Huevos Épicos</option>
-                <option value="legendario">Huevos Legendarios</option>
-            </select>
-        </div>
-
-        <!-- Huevo eclosión -->
+        <!-- Huevo eclosión aleatorio -->
         <div class="hatch-arena">
             <div id="egg-container" class="pokemon-egg-wrapper">
                 <div id="egg-display" class="egg-visual">🥚</div>
             </div>
-            <button id="hatch-btn" class="guide-btn">¡ECLOSIONAR HUEVO!</button>
+            <button id="hatch-btn" class="guide-btn">¡ECLOSIONAR UN HUEVO!</button>
             <div id="hatch-result" class="slot-result"></div>
         </div>
 
         <div class="back-link-container">
-        <a href="index.html" class="nav-btn">Volver al Inventario</a>
+            <a href="index.html" class="nav-btn">Volver al Inventario</a>
         </div>
     </main>
 
