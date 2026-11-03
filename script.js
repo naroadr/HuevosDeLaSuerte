@@ -1,4 +1,4 @@
-const CLIENT_ID = 'TU_CLIENT_ID_DE_TWITCH'; // Pon tu Client ID cuando lo tengas
+const CLIENT_ID = 'h987nd0jv7sd956zhnockko3mjmgaa';
 const REDIRECT_URI = window.location.origin + window.location.pathname;
 const tiposHuevos = ['roto', 'comun', 'pcomun', 'raro', 'epico', 'legendario'];
 

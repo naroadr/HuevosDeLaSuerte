@@ -83,9 +83,9 @@ document.addEventListener("DOMContentLoaded", () => {
             { name: "2.500 Dragonus", img: "imagenes/huevodragonu.png" },
         ],
         legendario: [
-            { name: "Cofre de Streamloots", img: "imagenes/huevodragonu.png" },
+            { name: "Cofre de Streamloots", img: "imagenes/cofre.png" },
             { name: "10.000 Dragonus", img: "imagenes/huevodragonu.png" },
-            { name: "VIP 1 Semana", img: "imagenes/huevodragonu.png" }
+            { name: "VIP 1 Semana", img: "imagenes/vip.png" }
         ]
     };
 
