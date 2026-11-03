@@ -1,4 +1,4 @@
-const CLIENT_ID = 'TU_CLIENT_ID_DE_TWITCH';
+const CLIENT_ID = 'h987nd0jv7sd956zhnockko3mjmgaa';
 const tiposHuevos = ['roto', 'comun', 'pcomun', 'raro', 'epico', 'legendario'];
 
 document.addEventListener("DOMContentLoaded", () => {
