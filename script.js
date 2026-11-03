@@ -31,7 +31,37 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 2. Control del menú desplegable del usuario
+    // 2. Fondo animado de huevos
+    const bgContainer = document.getElementById("bg-eggs");
+    const eggImages = [
+        'imagenes/huevo-roto.png',
+        'imagenes/huevo-comun.png',
+        'imagenes/huevo-poco-comun.png',
+        'imagenes/huevo-raro.png',
+        'imagenes/huevo-epico.png',
+        'imagenes/huevo-legendario.png'
+    ];
+    
+    function createFloatingEgg() {
+        if (!bgContainer) return;
+        const img = document.createElement("img");
+        img.src = eggImages[Math.floor(Math.random() * eggImages.length)];
+        img.classList.add("bg-floating-egg");
+        
+        const size = Math.floor(Math.random() * 30) + 30; // 30px - 60px
+        img.style.width = `${size}px`;
+        img.style.height = `${size}px`;
+        img.style.left = `${Math.random() * 100}vw`;
+        
+        const duration = Math.random() * 6 + 6; // 6s - 12s
+        img.style.animationDuration = `${duration}s`;
+        
+        bgContainer.appendChild(img);
+        setTimeout(() => img.remove(), duration * 1000);
+    }
+    setInterval(createFloatingEgg, 800);
+
+    // 3. Menú desplegable de usuario (Esquina superior izquierda)
     const usernameContainer = document.getElementById("top-username-container");
     const userDropdown = document.getElementById("user-dropdown");
 
@@ -40,13 +70,12 @@ document.addEventListener("DOMContentLoaded", () => {
             e.stopPropagation();
             userDropdown.classList.toggle("show");
         });
-
         window.addEventListener("click", () => {
             userDropdown.classList.remove("show");
         });
     }
 
-    // 3. Botones manuales para sumar huevos (+1)
+    // 4. Botones manuales para añadir huevos (+1) vinculados al usuario logueado
     const addButtons = document.querySelectorAll(".add-egg-btn");
     addButtons.forEach(button => {
         button.addEventListener("click", () => {
@@ -65,7 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // 4. Modal de guía
+    // 5. Modal de guía de funcionamiento
     const openGuideBtn = document.getElementById("open-guide-btn");
     const closeGuideBtn = document.getElementById("close-guide-btn");
     const guideModal = document.getElementById("guide-modal");
@@ -80,12 +109,12 @@ document.addEventListener("DOMContentLoaded", () => {
         if (event.target === guideModal) guideModal.style.display = "none";
     });
 
-    // 5. Autenticación y WebSocket
+    // 6. Autenticación Twitch y conexión WebSocket
     checkTwitchLogin();
     connectStreamerBot();
 });
 
-// Comprobar inicio de sesión con Twitch
+// Comprobar inicio de sesión con Twitch mediante Hash de URL o Token guardado
 function checkTwitchLogin() {
     const hash = window.location.hash.substring(1);
     const params = new URLSearchParams(hash);
@@ -105,6 +134,7 @@ function checkTwitchLogin() {
     }
 }
 
+// Consultar datos del usuario autenticado en la API de Twitch
 async function fetchTwitchUser(token) {
     try {
         const response = await fetch('https://api.twitch.tv/helix/users', {
@@ -116,9 +146,8 @@ async function fetchTwitchUser(token) {
         const data = await response.json();
         if (data.data && data.data.length > 0) {
             const user = data.data[0];
-            localStorage.setItem("current_twitch_user", user.login);
+            localStorage.setItem("current_twitch_user", user.login.toLowerCase());
             
-            // Actualizar nombre en la esquina superior izquierda
             const displayUsername = document.getElementById("display-username");
             if (displayUsername) displayUsername.textContent = user.display_name;
 
@@ -127,7 +156,6 @@ async function fetchTwitchUser(token) {
                 titleEl.innerHTML = `Inventario de recompensas de <strong>${user.display_name}</strong>`;
             }
             
-            // Cambiar opción del menú desplegable a "Cerrar sesión"
             const authBtn = document.getElementById("auth-action-btn");
             if (authBtn) {
                 authBtn.textContent = "🚪 Cerrar sesión";
@@ -140,12 +168,12 @@ async function fetchTwitchUser(token) {
                 };
             }
 
-            cargarInventarioUsuario(user.login);
+            cargarInventarioUsuario(user.login.toLowerCase());
         } else {
             throw new Error("Token no válido");
         }
     } catch (error) {
-        console.error("Error al obtener usuario:", error);
+        console.error("Error al obtener el usuario de Twitch:", error);
         localStorage.removeItem('twitch_token');
         localStorage.removeItem('current_twitch_user');
         configurarEstadoInvitado();
@@ -160,7 +188,7 @@ function configurarEstadoInvitado() {
 
     const authBtn = document.getElementById("auth-action-btn");
     if (authBtn) {
-        authBtn.textContent = "Iniciar sesión con Twitch";
+        authBtn.textContent = "🟣 Iniciar sesión con Twitch";
         authBtn.href = `https://id.twitch.tv/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=user:read:email`;
         authBtn.onclick = null;
     }
@@ -175,7 +203,7 @@ function cargarInventarioUsuario(username) {
     });
 }
 
-// Conexión WebSocket con Streamer.bot
+// Conexión con Streamer.bot para registrar canjes en tiempo real y sincronizar datos
 function connectStreamerBot() {
     const ws = new WebSocket('ws://localhost:8080/');
 
@@ -187,14 +215,49 @@ function connectStreamerBot() {
             }
         };
         ws.send(JSON.stringify(subscribeMessage));
+
+        // Si ya hay un usuario logueado, pedir su inventario a Streamer.bot
+        const currentUser = localStorage.getItem("current_twitch_user");
+        if (currentUser && currentUser !== "default") {
+            const syncRequest = {
+                "request": "GetInventory",
+                "user": currentUser
+            };
+            ws.send(JSON.stringify(syncRequest));
+        }
     };
 
     ws.onmessage = (event) => {
         try {
             const message = JSON.parse(event.data);
+            
+            // Si Streamer.bot responde con el inventario guardado del usuario
+            if (message.response === "InventoryData" && message.user && message.eggs) {
+                const targetUser = message.user.toLowerCase();
+                const loggedUser = (localStorage.getItem("current_twitch_user") || "default").toLowerCase();
+                
+                Object.keys(message.eggs).forEach(tipo => {
+                    const storageKey = `cnt-${targetUser}-${tipo}`;
+                    localStorage.setItem(storageKey, message.eggs[tipo]);
+                });
+
+                if (targetUser === loggedUser) {
+                    cargarInventarioUsuario(targetUser);
+                }
+                return;
+            }
+
+            // Lógica normal de canjes en directo
             let textoAAnalizar = "";
+            let twitchUser = "";
 
             if (message.data) {
+                if (message.data.user_name) twitchUser = message.data.user_name.toLowerCase();
+                else if (message.data.userName) twitchUser = message.data.userName.toLowerCase();
+                else if (message.data.message && message.data.message.user && message.data.message.user.username) {
+                    twitchUser = message.data.message.user.username.toLowerCase();
+                }
+
                 if (message.data.reward && message.data.reward.title) {
                     textoAAnalizar = message.data.reward.title.toLowerCase();
                 } else if (message.data.message && message.data.message.message) {
@@ -213,15 +276,18 @@ function connectStreamerBot() {
             else if (textoAAnalizar.includes("legendario")) eggType = "legendario";
 
             if (eggType) {
-                const currentUser = localStorage.getItem("current_twitch_user") || "default";
-                const storageKey = currentUser !== "default" ? `cnt-${currentUser}-${eggType}` : `cnt-${eggType}`;
+                const targetUser = twitchUser || localStorage.getItem("current_twitch_user") || "default";
+                const storageKey = targetUser !== "default" ? `cnt-${targetUser}-${eggType}` : `cnt-${eggType}`;
                 
                 let currentCount = parseInt(localStorage.getItem(storageKey)) || 0;
                 currentCount++;
                 localStorage.setItem(storageKey, currentCount);
 
-                const counterElement = document.getElementById(`cnt-${eggType}`);
-                if (counterElement) counterElement.textContent = currentCount;
+                const loggedUser = localStorage.getItem("current_twitch_user") || "default";
+                if (targetUser === loggedUser.toLowerCase()) {
+                    const counterElement = document.getElementById(`cnt-${eggType}`);
+                    if (counterElement) counterElement.textContent = currentCount;
+                }
             }
         } catch (e) {
             console.error("Error al procesar mensaje de Streamer.bot:", e);
