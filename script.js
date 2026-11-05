@@ -370,7 +370,7 @@ function cargarStats(user){
     }
 
     const achievements = [];
-
+ 
     tiposHuevos.forEach(tipo=>{
 
         const cantidad = parseInt(localStorage.getItem(`cnt-${user}-${tipo}`)) || 0;
