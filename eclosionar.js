@@ -1,4 +1,4 @@
-const CLIENT_ID = 'TU_CLIENT_ID_DE_TWITCH';
+const CLIENT_ID = 'h987nd0jv7sd956zhnockko3mjmgaa';
 const tiposHuevos = ['roto', 'comun', 'pcomun', 'raro', 'epico', 'legendario'];
 const fragmentRewards = {
     roto:1,
@@ -92,9 +92,9 @@ document.addEventListener("DOMContentLoaded", () => {
             { name: "2.500 Dragonus", img: "imagenes/huevodragonu.png" },
         ],
         legendario: [
-            { name: "Cofre de Streamloots", img: "imagenes/huevodragonu.png" },
+            { name: "Cofre de Streamloots", img: "imagenes/cofre.png" },
             { name: "10.000 Dragonus", img: "imagenes/huevodragonu.png" },
-            { name: "VIP 1 Semana", img: "imagenes/huevodragonu.png" }
+            { name: "VIP 1 Semana", img: "imagenes/vip.png" }
         ]
     };
 
