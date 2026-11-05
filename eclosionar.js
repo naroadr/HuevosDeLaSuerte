@@ -1,5 +1,13 @@
 const CLIENT_ID = 'TU_CLIENT_ID_DE_TWITCH';
 const tiposHuevos = ['roto', 'comun', 'pcomun', 'raro', 'epico', 'legendario'];
+const fragmentRewards = {
+    roto:1,
+    comun:2,
+    pcomun:4,
+    raro:8,
+    epico:15,
+    legendario:30
+};
 
 document.addEventListener("DOMContentLoaded", () => {
     // 1. Tema claro / oscuro
@@ -73,6 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const hatchBtn = document.getElementById("hatch-btn");
     const eggDisplay = document.getElementById("egg-display");
     const resultDiv = document.getElementById("hatch-result");
+    const fragmentDiv = document.getElementById("fragment-result");
 
     const rewardsMap = {
         roto: ["💩", "🪨", "🦴", "💨"],
@@ -132,14 +141,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 const possibleRewards = rewardsMap[selectedEgg] || rewardsMap["comun"];
                 const finalPrize = possibleRewards[Math.floor(Math.random() * possibleRewards.length)];
+                let fragments = parseInt(localStorage.getItem(`fragments-${currentUser}`)) || 0;
+                fragments += fragmentRewards[selectedEgg];
+                localStorage.setItem(`fragments-${currentUser}`, fragments);
+                localStorage.setItem(
+                    "hatched-total",
+                    (parseInt(localStorage.getItem("hatched-total")) || 0) + 1
+                );
+
+                localStorage.setItem(
+                    `hatched-${selectedEgg}`,
+                    (parseInt(localStorage.getItem(`hatched-${selectedEgg}`)) || 0) + 1
+                );
 
                 setTimeout(() => {
-                    if (typeof finalPrize === 'object') {
-                        eggDisplay.innerHTML = `<img src="${finalPrize.img}" alt="${finalPrize.name}" class="prize-img">`;
-                        resultDiv.innerHTML = `¡Felicidades! Has conseguido:<br><strong>${finalPrize.name}</strong>`;
+                    if (typeof finalPrize === "object") {
+                        const img = document.createElement("img");
+                        img.src = finalPrize.img;
+                        img.alt = finalPrize.name;
+                        img.className = "prize-img";
+                        eggDisplay.innerHTML = "";
+                        eggDisplay.appendChild(img);
+                        resultDiv.innerHTML =
+                            "¡Felicidades! Has conseguido:<br><strong>" +
+                            finalPrize.name +
+                            "</strong>";
                     } else {
                         eggDisplay.textContent = finalPrize;
-                        resultDiv.innerHTML = `¡Felicidades! Has conseguido: <strong>${finalPrize}</strong>`;
+                        resultDiv.innerHTML =
+                            "¡Felicidades! Has conseguido: <strong>" +
+                            finalPrize +
+                            "</strong>";
                     }
 
                     eggDisplay.classList.remove("hatching-pop");
@@ -153,7 +185,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             colors: ['#a855f7', '#ca8a04', '#0284c7', '#22c55e']
                         });
                     }
-
+                    fragmentDiv.innerHTML = `✨ +${fragmentRewards[selectedEgg]} Fragmentos de Suerte`;
                     hatchBtn.disabled = false;
                 }, 300);
 

@@ -16,6 +16,17 @@
             <div id="user-dropdown" class="dropdown-menu">
                 <a href="#" id="auth-action-btn">Iniciar sesión con Twitch</a>
             </div>
+            <div class="user-stats-panel">
+                <div class="panel-title">🏆 Ranking</div>
+                <div id="user-rank">Sin datos</div>
+
+                <div class="panel-title">✨ Fragmentos</div>
+                <div id="fragment-count">0</div>
+            </div>
+           <button id="open-achievements-btn" class="guide-btn">
+                🏅 Ver Logros
+            </button>
+            
         </div>
         
         <button id="theme-toggle" class="theme-toggle-btn" title="Cambiar modo claro/oscuro">
@@ -74,7 +85,15 @@
     <div class="info-section">
         <button id="open-guide-btn" class="guide-btn">¿Cómo conseguir huevos y cómo funciona?</button>
     </div>
+    <div class="collection-progress">
+        <h3>📚 Colección</h3>
+        <div class="progress-bar">
+            <div id="collection-fill"
+            class="progress-fill"></div>
+        </div>
+        <p id="collection-text">0 / 6 descubiertos</p>
 
+        </div>
     
     <div id="guide-modal" class="modal">
         <div class="modal-content">
@@ -114,7 +133,18 @@
     <ul id="hatch-history-list" class="history-list">
         <li class="history-item">Aún no hay eclosiones recientes... ¡Sé el primero en abrir un huevo!</li>
     </ul>
-</section>
+    </section>
+    <div id="achievements-modal" class="modal">
+    <div class="modal-content">
+            <span id="close-achievements-btn" class="close-btn">&times;</span>
+
+            <h2>🏅 Logros</h2>
+
+            <div id="achievements-container"></div>
+        </div>
+    </div>
+
+
     <script src="script.js"></script>
 </body>
 </html>

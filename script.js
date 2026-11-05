@@ -83,6 +83,30 @@ document.addEventListener("DOMContentLoaded", () => {
     // 5. Autenticación y WebSocket
     checkTwitchLogin();
     connectStreamerBot();
+    const openAchievementsBtn = document.getElementById("open-achievements-btn");
+    const achievementsModal = document.getElementById("achievements-modal");
+    const closeAchievementsBtn = document.getElementById("close-achievements-btn");
+
+    if(openAchievementsBtn){
+
+        openAchievementsBtn.addEventListener("click", () => {
+
+            cargarLogros();
+            achievementsModal.style.display = "flex";
+
+        });
+
+    }
+
+    if(closeAchievementsBtn){
+
+        closeAchievementsBtn.addEventListener("click", () => {
+
+            achievementsModal.style.display = "none";
+
+        });
+
+    }
 });
 
 // Comprobar inicio de sesión con Twitch
@@ -141,6 +165,8 @@ async function fetchTwitchUser(token) {
             }
 
             cargarInventarioUsuario(user.login);
+            cargarHistorial();
+            cargarStats(user.login);
         } else {
             throw new Error("Token no válido");
         }
@@ -157,6 +183,8 @@ function configurarEstadoInvitado() {
     if (displayUsername) displayUsername.textContent = "Invitado";
 
     cargarInventarioUsuario("default");
+    cargarHistorial();
+    cargarStats("default");
 
     const authBtn = document.getElementById("auth-action-btn");
     if (authBtn) {
@@ -230,4 +258,157 @@ function connectStreamerBot() {
 
     ws.onclose = () => { setTimeout(connectStreamerBot, 5000); };
     ws.onerror = (error) => { console.error("Error en WebSocket:", error); };
+}
+function cargarHistorial(){
+
+    const lista = document.getElementById("hatch-history-list");
+
+    if(!lista) return;
+
+    const historial = JSON.parse(localStorage.getItem("hatchHistory")) || [];
+
+    if(!historial.length){
+        return;
+    }
+
+    lista.innerHTML = "";
+
+    historial.forEach(item=>{
+
+        const li = document.createElement("li");
+
+        li.className = "history-item";
+
+        li.innerHTML = `
+            <span>${item.user} obtuvo ${item.reward} desde un huevo ${item.egg}</span>
+        `;
+
+        lista.appendChild(li);
+
+    });
+
+}
+
+function cargarStats(user){
+
+    const fragmentos = parseInt(localStorage.getItem(`fragments-${user}`)) || 0;
+
+    const fragmentUI = document.getElementById("fragment-count");
+
+    if(fragmentUI){
+        fragmentUI.textContent = fragmentos;
+    }
+
+    const achievements = [];
+
+    tiposHuevos.forEach(tipo=>{
+
+        const cantidad = parseInt(localStorage.getItem(`cnt-${user}-${tipo}`)) || 0;
+
+        if(cantidad > 0){
+            achievements.push(`✅ ${tipo}`);
+        }
+
+    });
+
+    const logros = document.getElementById("achievement-list");
+
+    if(logros){
+        logros.innerHTML = achievements.length ? achievements.join("<br>") : "Ninguno";
+    }
+
+    const discovered = achievements.length;
+
+    const fill = document.getElementById("collection-fill");
+    const text = document.getElementById("collection-text");
+
+    const percent = (discovered / 6) * 100;
+
+    if(fill){
+        fill.style.width = percent + "%";
+    }
+
+    if(text){
+        text.textContent = `${discovered} / 6 descubiertos`;
+    }
+
+    const rank = document.getElementById("user-rank");
+
+    if(rank){
+
+        const score =
+        (parseInt(localStorage.getItem(`cnt-${user}-comun`)) || 0) * 1 +
+        (parseInt(localStorage.getItem(`cnt-${user}-pcomun`)) || 0) * 3 +
+        (parseInt(localStorage.getItem(`cnt-${user}-raro`)) || 0) * 10 +
+        (parseInt(localStorage.getItem(`cnt-${user}-epico`)) || 0) * 25 +
+        (parseInt(localStorage.getItem(`cnt-${user}-legendario`)) || 0) * 100;
+
+        rank.innerHTML = `⭐ ${score} pts`;
+    }
+
+}
+const achievementDefinitions = [
+    {
+        title: "🥚 Eclosionador Novato",
+        current: () => parseInt(localStorage.getItem("hatched-total")) || 0,
+        goal: 10
+    },
+    {
+        title: "📦 Eclosionador Experto",
+        current: () => parseInt(localStorage.getItem("hatched-total")) || 0,
+        goal: 100
+    },
+    {
+        title: "💀 Skill issue de manual",
+        current: () => parseInt(localStorage.getItem("hatched-roto")) || 0,
+        goal: 20
+    },
+    {
+        title: "🔵 Cazador de Huevos raros",
+        current: () => parseInt(localStorage.getItem("hatched-raro")) || 0,
+        goal: 10
+    },
+    {
+        title: "🟣 Bendecido por los huevos",
+        current: () => parseInt(localStorage.getItem("hatched-epico")) || 0,
+        goal: 5
+    },
+    {
+        title: "👑 Elegido de RyuuzZ",
+        current: () => parseInt(localStorage.getItem("hatched-legendario")) || 0,
+        goal: 1
+    },
+    {
+        title: "✨ Acumulador",
+        current: () => {
+            const user = localStorage.getItem("current_twitch_user") || "default";
+            return parseInt(localStorage.getItem(`fragments-${user}`)) || 0;
+        }        
+    }
+];
+
+function cargarLogros(){
+
+    const container = document.getElementById("achievements-container");
+
+    if(!container) return;
+
+    container.innerHTML = "";
+
+    achievementDefinitions.forEach(logro => {
+
+        const actual = logro.current();
+        const porcentaje = Math.min((actual / logro.goal) * 100, 100);
+
+        container.innerHTML += `
+            <div class="achievement-card">
+                <strong>${logro.title}</strong>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width:${porcentaje}%"></div>
+                </div>
+                <span>${actual} / ${logro.goal}</span>
+            </div>
+        `;
+    });
+
 }

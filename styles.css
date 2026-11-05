@@ -444,20 +444,22 @@ h1 {
     backdrop-filter: blur(5px);
 }
 
-.modal-content {
+.modal-content{
     background-color: var(--modal-bg);
     color: var(--text-color);
-    margin: 5% auto;
+    margin: 3% auto;
     padding: 30px;
     border: 2px solid var(--modal-border);
     border-radius: 16px;
     width: 90%;
     max-width: 550px;
+    max-height: 80vh;
+    overflow-y: auto;
     text-align: left;
     position: relative;
     box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-    animation: fadeIn 0.3s ease-in-out;
 }
+
 
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-20px); }
@@ -559,4 +561,118 @@ code {
         font-size: 1.6rem;
         margin-top: 30px;
     }
+}
+.user-stats-panel{
+    margin-top:10px;
+    width:200px;
+    background:var(--card-bg);
+    border:2px solid #9333ea;
+    border-radius:16px;
+    padding:12px;
+    text-align:left;
+    box-shadow:0 0 15px rgba(147,51,234,.25);
+}
+
+.panel-title{
+    color:#a855f7;
+    font-weight:bold;
+    margin-top:10px;
+    margin-bottom:5px;
+}
+
+#user-rank,
+#fragment-count,
+#achievement-list{
+    font-size:.9rem;
+    color:var(--text-color);
+}
+
+.achievement-unlocked{
+    color:#22c55e;
+}
+
+.achievement-locked{
+    color:#64748b;
+}
+
+.card[data-rarity="legendario"]{
+    box-shadow:
+    0 0 20px rgba(255,215,0,.6);
+}
+
+.card[data-rarity="epico"]{
+    box-shadow:
+    0 0 20px rgba(168,85,247,.6);
+}
+
+.card[data-rarity="raro"]{
+    box-shadow:
+    0 0 15px rgba(2,132,199,.5);
+}
+
+.collection-progress{
+    max-width:900px;
+    margin:0 auto 25px auto;
+}
+
+.progress-bar{
+    width:100%;
+    height:16px;
+    background:#1e293b;
+    border-radius:20px;
+    overflow:hidden;
+}
+
+.progress-fill{
+    height:100%;
+    background:linear-gradient(90deg,#9333ea,#ca8a04);
+}
+.fragment-result{
+    margin-top:10px;
+    font-size:1rem;
+    color:#facc15;
+    font-weight:bold;
+    text-shadow:0 0 8px rgba(250,204,21,.5);
+    min-height:24px;
+}
+.achievement-card{
+    padding:12px;
+    margin-bottom:12px;
+    border:1px solid #9333ea;
+    border-radius:12px;
+}
+
+.achievement-card span{
+    display:block;
+    margin-top:6px;
+}
+
+.achievement-card strong{
+    display:block;
+    margin-bottom:8px;
+}
+
+.progress-bar{
+    width:100%;
+    height:14px;
+    background:#1e293b;
+    border-radius:20px;
+    overflow:hidden;
+    margin-bottom:6px;
+}
+
+.progress-fill{
+    height:100%;
+    background:linear-gradient(
+        90deg,
+        #9333ea,
+        #ca8a04
+    );
+    transition:.4s;
+    box-shadow:0 0 12px rgba(168,85,247,.5);
+}
+#open-achievements-btn{
+    margin:20px auto 0 auto;
+    display:block;
+    width:180px;
 }
