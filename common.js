@@ -1,6 +1,6 @@
 // ====== CONFIG: pon aquí la URL de tu Worker ======
 const CFG = {
-  API: 'https://TU-WORKER.TU-USUARIO.workers.dev',
+  API: 'https://naroadr.github.io/HuevosDeLaSuerte/',
   CLIENT_ID: 'h987nd0jv7sd956zhnockko3mjmgaa'
 };
 
