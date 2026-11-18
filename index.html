@@ -1,150 +1,94 @@
-<!DOCTYPE html>
+</html><!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventario de Huevos - RyuuzZ_</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventario de Huevos - RyuuzZ_</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="extra.css">
 </head>
 <body>
-    <header>
-        <div class="user-menu-container">
-            <div id="top-username-container" class="top-username">
-                👤 <span id="display-username">Invitado</span> ▼
-            </div>
-            <div id="user-dropdown" class="dropdown-menu">
-                <a href="#" id="auth-action-btn">Iniciar sesión con Twitch</a>
-            </div>
-            <div class="user-stats-panel">
-                <div class="panel-title">🏆 Ranking</div>
-                <div id="user-rank">Sin datos</div>
+  <div class="user-menu-container">
+    <div id="top-username-container" class="top-username" tabindex="0">👤 <span id="display-username">Invitado</span> ▼</div>
+    <div id="user-dropdown" class="dropdown-menu"><a href="#" id="auth-action-btn">Iniciar sesión con Twitch</a></div>
+  </div>
+  <button id="theme-toggle" class="theme-toggle-btn" title="Cambiar modo claro/oscuro" aria-label="Cambiar tema">
+    <img id="theme-icon" src="imagenes/luna.png" alt="">
+  </button>
 
-                <div class="panel-title">✨ Fragmentos</div>
-                <div id="fragment-count">0</div>
-            </div>
-           <button id="open-achievements-btn" class="guide-btn">
-                🏅 Ver Logros
-            </button>
-            
-        </div>
-        
-        <button id="theme-toggle" class="theme-toggle-btn" title="Cambiar modo claro/oscuro">
-            <img id="theme-icon" src="imagenes/luna.png" alt="Cambiar tema">
-        </button>
-        <h1>🥚 Colección de Huevos de la Suerte 🥚</h1>
-        <p class="subtitle" id="user-title">Inventario de recompensas del canal de <strong>RyuuzZ_</strong></p>
-    </header>
+  <header>
+    <h1>🥚 Colección de Huevos de la Suerte 🥚</h1>
+    <p class="subtitle" id="user-title">Inventario de recompensas del canal de <strong>RyuuzZ_</strong></p>
+  </header>
 
-    <main class="grid">
-        <div class="card" data-rarity="roto">
-            <div class="egg-icon">😞</div>
-            <div class="egg-name rarity-roto"> Huevos Rotos</div>
-            <div class="count" id="cnt-roto">0</div>
-            <button class="add-egg-btn" data-egg="roto">+ Añadir Huevo</button>
-        </div>
+  <div id="login-banner" class="panel banner" hidden>
+    Inicia sesión con Twitch para ver tus huevos, logros y posición en el ranking.
+  </div>
 
-        <div class="card" data-rarity="comun">
-            <div class="egg-icon">🥚</div>
-            <div class="egg-name rarity-comun">Huevos Comunes</div>
-            <div class="count" id="cnt-comun">0</div>
-            <button class="add-egg-btn" data-egg="comun">+ Añadir Huevo</button>
-        </div>
+  <section class="stats-row">
+    <div class="stat"><span>Puntos</span><b id="stat-score">0</b></div>
+    <div class="stat"><span>Fragmentos de suerte</span><b id="stat-frag">0</b></div>
+    <div class="stat"><span>Puesto</span><b id="stat-rank">—</b></div>
+  </section>
 
-        <div class="card" data-rarity="pcomun">
-            <div class="egg-icon">🟢</div>
-            <div class="egg-name rarity-pcomun">Huevos Poco Comunes</div>
-            <div class="count" id="cnt-pcomun">0</div>
-            <button class="add-egg-btn" data-egg="pcomun">+ Añadir Huevo</button>
-        </div>
+  <main class="grid" id="egg-grid"></main>
+  <a href="eclosionar.html" class="nav-btn">¡ECLOSIONAR HUEVOS!</a>
 
-        <div class="card" data-rarity="raro">
-            <div class="egg-icon">🔵</div>
-            <div class="egg-name rarity-raro">Huevos Raros</div>
-            <div class="count" id="cnt-raro">0</div>
-            <button class="add-egg-btn" data-egg="raro">+ Añadir Huevo</button>
-        </div>
+  <section class="panel collection-progress">
+    <h2>📚 Colección</h2>
+    <div class="progress-bar"><div id="collection-fill" class="progress-fill"></div></div>
+    <p id="collection-text">0 / 6 tipos descubiertos</p>
+  </section>
 
-        <div class="card" data-rarity="epico">
-            <div class="egg-icon"><img src="imagenes/huevodragonu.png" alt="Huevo Épico" class="card-img"></div>
-            <div class="egg-name rarity-epico">Huevos Épicos</div>
-            <div class="count" id="cnt-epico">0</div>
-            <button class="add-egg-btn" data-egg="epico">+ Añadir Huevo</button>
-        </div>
+  <section class="panel">
+    <h2>🏅 Logros <small id="ach-count"></small></h2>
+    <div class="ach-grid" id="ach-grid"></div>
+  </section>
 
-        <div class="card" data-rarity="legendario">
-            <div class="egg-icon">👑</div>
-            <div class="egg-name rarity-legendario">Huevos Legendarios</div>
-            <div class="count" id="cnt-legendario">0</div>
-            <button class="add-egg-btn" data-egg="legendario">+ Añadir Huevo</button>
-        </div>  
-    </main>
-    <a href="eclosionar.html" class="nav-btn">¡ECLOSIONAR HUEVOS!</a>
-
-    <!-- BOTON FUNCIONAMIENTO DE LOS HUEVOS -->
-    <div class="info-section">
-        <button id="open-guide-btn" class="guide-btn">¿Cómo conseguir huevos y cómo funciona?</button>
-    </div>
-    <div class="collection-progress">
-        <h3>📚 Colección</h3>
-        <div class="progress-bar">
-            <div id="collection-fill"
-            class="progress-fill"></div>
-        </div>
-        <p id="collection-text">0 / 6 descubiertos</p>
-
-        </div>
-    
-    <div id="guide-modal" class="modal">
-        <div class="modal-content">
-            <span id="close-guide-btn" class="close-btn">&times;</span>
-            <h2>¿Cómo funciona el canjeo de puntos de Twitch?</h2>
-            
-            <div class="guide-step">
-                <h3>1. Canjea en Twitch</h3>
-                <p>Ve al chat del stream y canjea la recompensa de puntos de canal <strong>"Huevos de la suerte"</strong>.</p>
-            </div>
-
-            <div class="guide-step">
-                <h3>2. Deja que el bot te de tu huevo</h3>
-                <p>Al canjear, el bot tirará un dado automático entre <strong>1 y 100</strong> para determinar qué huevo te ha tocado.</p>
-            </div>
-
-            <div class="guide-step">
-                <h3>3. Tabla de Probabilidades</h3>
-                <ul class="rarity-list">
-                    <li><span class="rarity-roto"><strong>😞 Huevo Roto:</strong></span> 35% de probabilidad</li>
-                    <li><span class="rarity-comun"><strong>🥚 Huevo Común:</strong></span> 30% de probabilidad</li>
-                    <li><span class="rarity-pcomun"><strong>🟢 Huevo Poco Común:</strong></span> 18% de probabilidad</li>
-                    <li><span class="rarity-raro"><strong>🔵 Huevo Raro:</strong></span> 10% de probabilidad</li>
-                    <li><span class="rarity-epico"><strong>💜 Huevo Épico:</strong></span> 5% de probabilidad</li>
-                    <li><span class="rarity-legendario"><strong>👑 Huevo Legendario:</strong></span> 2% de probabilidad</li>
-                </ul>
-            </div>
-
-            <div class="guide-step">
-                <h3>4. Consulta en el Chat</h3>
-                <p>Escribe <code>!inv</code> en el chat de <strong>RyuuzZ_</strong> en Twitch en cualquier momento para ver tu inventario de huevos.</p>
-            </div>
-        </div>
-    </div>
-    <section class="history-section">
-    <h2>ʕ•́ᴥ•̀ʔっ Últimas Eclosiones</h2>
-    <ul id="hatch-history-list" class="history-list">
-        <li class="history-item">Aún no hay eclosiones recientes... ¡Sé el primero en abrir un huevo!</li>
-    </ul>
+  <div class="two-col">
+    <section class="panel">
+      <h2>ʕ•́ᴥ•̀ʔっ Últimas eclosiones del canal</h2>
+      <ul id="hatch-history-list" class="history-list"></ul>
     </section>
-    <div id="achievements-modal" class="modal">
+    <section class="panel">
+      <h2>🧺 Mis huevos conseguidos</h2>
+      <ul id="my-log" class="history-list"></ul>
+    </section>
+  </div>
+
+  <section class="panel">
+    <h2>🏆 Ranking</h2>
+    <ol id="leaderboard" class="leaderboard"></ol>
+  </section>
+
+  <div class="info-section"><button id="open-guide-btn" class="guide-btn">¿Cómo conseguir huevos y cómo funciona?</button></div>
+
+  <div id="guide-modal" class="modal">
     <div class="modal-content">
-            <span id="close-achievements-btn" class="close-btn">&times;</span>
-
-            <h2>🏅 Logros</h2>
-
-            <div id="achievements-container"></div>
-        </div>
+      <span id="close-guide-btn" class="close-btn" role="button" aria-label="Cerrar">&times;</span>
+      <h2>¿Cómo funciona?</h2>
+      <div class="guide-step"><h3>1. Canjea en Twitch</h3><p>Canjea la recompensa de puntos de canal <strong>"Huevos de la suerte"</strong> en el canal de <strong>RyuuzZ_</strong>.</p></div>
+      <div class="guide-step"><h3>2. El bot tira un dado</h3><p>Según el resultado te toca un tipo de huevo y se guarda en tu cuenta.</p></div>
+      <div class="guide-step"><h3>3. Probabilidades</h3>
+        <ul class="rarity-list">
+          <li><span class="rarity-roto"><strong>😞 Roto:</strong></span> 35%</li>
+          <li><span class="rarity-comun"><strong>🥚 Común:</strong></span> 30%</li>
+          <li><span class="rarity-pcomun"><strong>🟢 Poco común:</strong></span> 18%</li>
+          <li><span class="rarity-raro"><strong>🔵 Raro:</strong></span> 10%</li>
+          <li><span class="rarity-epico"><strong>💜 Épico:</strong></span> 5%</li>
+          <li><span class="rarity-legendario"><strong>👑 Legendario:</strong></span> 2%</li>
+        </ul></div>
+      <div class="guide-step"><h3>Secretos</h3><p>Se dice que existen huevos y logros que nadie te va a contar. 🤫</p></div>
+      <div class="guide-step"><h3>4. Eclosiona</h3><p>Entra en <em>Eclosionar huevos</em> y descubre tu premio al abrir aleatoriamente los huevos que tengas en el inventario. Cada eclosión da fragmentos y progreso en logros.</p></div>
+      <div class="guide-step"><h3>5. Chat</h3><p>Escribe <code>!inv</code> en el chat para ver tu inventario.</p></div>
     </div>
+  </div>
 
-
-    <script src="script.js"></script>
+  <div class="bg-eggs-container" id="bg-eggs"></div>
+  <script src="common.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>

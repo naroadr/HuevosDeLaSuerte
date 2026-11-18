@@ -1,0 +1,111 @@
+/* Se carga DESPUÉS de styles.css */
+body { padding-top: 70px; }
+header { margin-bottom: 24px; }
+:focus-visible { outline: 3px solid #a855f7; outline-offset: 2px; }
+.progress-bar { background: var(--code-bg); }
+.panel { max-width: 900px; margin: 24px auto; background: var(--card-bg); border: 2px solid var(--card-border); border-radius: 16px; padding: 20px; box-shadow: 0 8px 16px var(--card-shadow); text-align: left; }
+.panel h2 { color: #a855f7; font-size: 1.2rem; margin: 0 0 14px; }
+.panel h2 small { color: var(--subtitle-color); font-weight: normal; margin-left: 8px; }
+.banner { text-align: center; border-color: #a855f7; }
+.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 900px; margin: 0 auto 24px; }
+.stat { background: var(--card-bg); border: 2px solid #9333ea; border-radius: 14px; padding: 12px; box-shadow: 0 0 15px rgba(147,51,234,.25); }
+.stat span { display: block; color: var(--subtitle-color); font-size: .85rem; }
+.stat b { font-size: 1.8rem; color: var(--count-color); }
+.card .count.bump { animation: bump .5s ease; }
+@keyframes bump { 50% { transform: scale(1.4); } }
+.ach-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.ach { display: flex; gap: 12px; padding: 12px; border: 1px solid var(--card-border); border-radius: 12px; opacity: .6; }
+.ach.done { opacity: 1; border-color: #22c55e; background: rgba(34,197,94,.08); }
+.ach-icon { font-size: 2rem; }
+.ach-body { flex: 1; min-width: 0; }
+.ach-body strong, .ach-body small { display: block; }
+.ach-body small { color: var(--subtitle-color); }
+.ach-body .progress-bar { margin: 6px 0 4px; height: 8px; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; max-width: 900px; margin: 0 auto; }
+.two-col .panel { margin: 24px 0; min-width: 0; }
+.history-list { max-height: 260px; }
+.history-item small { color: var(--subtitle-color); white-space: nowrap; margin-left: 10px; }
+.leaderboard { list-style: none; margin: 0; padding: 0; }
+.leaderboard li { display: grid; grid-template-columns: 40px 1fr auto; padding: 8px 10px; border-radius: 8px; }
+.leaderboard li.me { background: rgba(168,85,247,.18); }
+.leaderboard em { font-style: normal; color: var(--count-color); }
+.egg-picker { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; background: var(--card-bg); color: var(--text-color); border: 2px solid var(--card-border); border-radius: 20px; padding: 6px 12px; cursor: pointer; font-family: inherit; }
+.chip.on { border-color: #a855f7; box-shadow: 0 0 10px rgba(168,85,247,.5); }
+.chip:disabled { opacity: .35; cursor: not-allowed; }
+.chip .card-img { width: 18px; height: 18px; }
+.guide-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.glow-epico { filter: drop-shadow(0 0 20px #a855f7); }
+.glow-legendario { filter: drop-shadow(0 0 24px #facc15); }
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translate(-50%, 120px); background: var(--card-bg); border: 2px solid #22c55e; padding: 12px 20px; border-radius: 12px; transition: transform .4s; z-index: 200; }
+.toast.show { transform: translate(-50%, 0); }
+.modal { align-items: flex-start; justify-content: center; }
+.modal-content { margin: 5vh auto; }
+@media (max-width: 700px) { .two-col, .ach-grid { grid-template-columns: 1fr; } .stats-row { grid-template-columns: 1fr; } .grid { grid-template-columns: repeat(2, 1fr); } }
+@media (prefers-reduced-motion: reduce) { * { animation-duration: .01s !important; } }
+
+/* Tipografía global (estilo Valorant: titulares condensados + cuerpo tipo DIN) */
+body, button, input { font-family: 'Barlow', system-ui, sans-serif; font-size: 15px; }
+h1, h2, h3, .egg-name, .count, .stat b, .nav-btn, .guide-btn, .top-username, .chip, .panel h2, .modal-content h2 {
+  font-family: 'Barlow Condensed', 'Barlow', sans-serif; text-transform: uppercase; letter-spacing: 1px; }
+h1 { font-size: 2.3rem; font-weight: 700; letter-spacing: 2px; line-height: 1.05; }
+.subtitle { letter-spacing: .3px; }
+.egg-name { font-weight: 600; font-size: 1.1rem; }
+.count, .stat b { font-weight: 700; }
+.count { font-size: 2.1rem; }
+.nav-btn, .guide-btn { font-size: 1.05rem; letter-spacing: 1.5px; }
+.egg-stock { color: var(--subtitle-color); min-height: 24px; }
+.egg-stock b { color: var(--count-color); }
+code { font-family: ui-monospace, Consolas, monospace; }
+/* Nuevos huevos */
+.rarity-troll { color: #f97316; }
+.rarity-mitico { background: linear-gradient(90deg, #f472b6, #a78bfa, #38bdf8, #4ade80, #f472b6); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shine 4s linear infinite; font-weight: 600; }
+@keyframes shine { to { background-position: 200% center; } }
+.card[hidden] { display: none; }
+.card[data-rarity="mitico"] { border-color: #a78bfa; box-shadow: 0 0 22px rgba(167,139,250,.6), 0 0 40px rgba(56,189,248,.25); }
+.card[data-rarity="troll"] { border-color: #f97316; box-shadow: 0 0 16px rgba(249,115,22,.45); }
+.glow-mitico { filter: drop-shadow(0 0 28px #a78bfa) drop-shadow(0 0 12px #38bdf8); }
+.glow-troll { filter: drop-shadow(0 0 18px #f97316); }
+/* Logros */
+.ach.locked { opacity: .85; border-style: dashed; }
+.ach.locked .ach-icon { filter: grayscale(1); }
+.ach.secret { opacity: .6; }
+.ach.secret strong { letter-spacing: 3px; }
+
+/* Tarjeta misteriosa (evento / secreto) */
+.card.mystery { border-style: dashed; box-shadow: none; background: repeating-linear-gradient(135deg, var(--card-bg) 0 12px, rgba(168,85,247,.07) 12px 24px); }
+.card.mystery:hover { transform: none; border-color: var(--card-border); box-shadow: none; }
+.mystery-icon { position: relative; }
+.mystery-icon span { display: inline-block; filter: blur(5px) grayscale(1) brightness(.5); }
+.mystery-icon i { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-style: normal; font-size: 32px; }
+.mystery .count { color: var(--subtitle-color); }
+.mystery-hint { color: var(--subtitle-color); font-size: .9rem; margin-top: 10px; }
+@media (max-width: 480px) { h1 { font-size: 1.7rem; } }
+
+/* --- Index: tarjetas más pequeñas y más aire --- */
+.grid { grid-template-columns: repeat(3, minmax(0, 220px)); justify-content: center; gap: 28px; }
+.card { padding: 16px 14px; }
+.card .egg-icon { font-size: 36px; margin-bottom: 8px; }
+.card .card-img { width: 38px; height: 38px; }
+.card .egg-name { font-size: 1rem; margin-bottom: 8px; }
+.card .count { font-size: 1.8rem; }
+.mystery-icon i { font-size: 26px; }
+.stats-row { margin-bottom: 32px; }
+.grid + .nav-btn { margin: 48px 0 40px; }
+.panel { margin: 30px auto; }
+.two-col .panel { margin: 30px 0; }
+.info-section { margin: 48px 0 30px; }
+
+/* --- Eclosionar: letra más grande y más espacio --- */
+.page-hatch h1 { font-size: 3rem; }
+.page-hatch .subtitle { font-size: 1.35rem; }
+.page-hatch .hatch-arena { gap: 26px; }
+.page-hatch .hatch-main { max-width: 720px; }
+.page-hatch .egg-stock { font-size: 1.25rem; }
+.page-hatch .guide-btn { font-size: 1.5rem; padding: 16px 40px; margin: 8px 0; }
+.page-hatch #hatch-result { font-size: 1.4rem; min-height: 34px; }
+.page-hatch #hatch-result strong { font-size: 2rem; }
+.page-hatch .fragment-result { font-size: 1.35rem; }
+.page-hatch .nav-btn { font-size: 1.2rem; margin-top: 24px; }
+.page-hatch .toast { font-size: 1.15rem; }
+@media (max-width: 480px) { .page-hatch h1 { font-size: 2.1rem; } .grid { gap: 16px; } }
